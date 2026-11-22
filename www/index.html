@@ -43,7 +43,18 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useMemo } = React;
+    const { useState, useMemo, useEffect } = React;
+
+    // =========================================================================
+    // 🔒 DEVELOPER LICENSE KEYS (Change or add keys here for paying clients)
+    // =========================================================================
+    const DEVELOPER_WHATSAPP = "919101318482"; // Your WhatsApp number for "Buy License" button
+    const VALID_LICENSE_KEYS = {
+      "DEMO-2026": { type: "demo", label: "24-Hour Pitch Demo", persistent: false },
+      "TD-PRO-9910": { type: "pro", label: "Lifetime Pro License", persistent: true },
+      "TD-VIP-7741": { type: "pro", label: "Annual Pro License", persistent: true },
+      "TD-PLUS-5520": { type: "pro", label: "Standard Coaching License", persistent: true }
+    };
 
     const INITIAL_STUDENTS = [
       {
@@ -162,35 +173,6 @@
           { test: "T6", score: 75, topic: "Gravitation" }
         ],
         rank: 5
-      },
-      {
-        id: 4,
-        rollNo: "TD-2026-105",
-        name: "Ananya Iyer",
-        batch: "Class 9 - Foundation (5:30 PM)",
-        parentName: "Karthik Iyer",
-        parentPhone: "9840011229",
-        feeAmount: 2200,
-        dueDate: "05 Oct 2026",
-        daysLate: 0,
-        feePaid: true,
-        attendanceToday: "P",
-        parentConfirmation: { status: "Attended", reason: "", timestamp: "26 Oct, 3:00 PM", locked: true },
-        teacherVerification: { status: "Teacher Verified", verifiedBy: "Teacher Rajesh", timestamp: "26 Oct, 5:45 PM" },
-        attendancePct: 96,
-        homework: [
-          { id: 401, subject: "Maths", task: "Lines and Angles Theorem Proof", done: true },
-          { id: 402, subject: "Science", task: "Atoms & Molecules Valency Chart", done: true }
-        ],
-        testScores: [
-          { test: "T1", score: 80, topic: "Number System" },
-          { test: "T2", score: 83, topic: "Motion" },
-          { test: "T3", score: 85, topic: "Matter" },
-          { test: "T4", score: 84, topic: "Force" },
-          { test: "T5", score: 89, topic: "Triangles" },
-          { test: "T6", score: 88, topic: "Gravitation" }
-        ],
-        rank: 3
       }
     ];
 
@@ -201,11 +183,9 @@
 
     const INITIAL_AUDIT_LOGS = [
       { id: 1, timestamp: "26 Oct, 2:10 PM", actor: "Meena Sharma (Parent)", action: "Reported Absent", details: "[TD-2026-103] Diya Sharma • Fever and mild cold" },
-      { id: 2, timestamp: "26 Oct, 3:30 PM", actor: "Rajesh Patel (Parent)", action: "Confirmed Attended", details: "[TD-2026-101] Aarav Patel" },
-      { id: 3, timestamp: "26 Oct, 4:15 PM", actor: "Teacher Rajesh", action: "Verified Present", details: "[TD-2026-101] Aarav Patel" }
+      { id: 2, timestamp: "26 Oct, 3:30 PM", actor: "Rajesh Patel (Parent)", action: "Confirmed Attended", details: "[TD-2026-101] Aarav Patel" }
     ];
 
-    // Circular Attendance Ring Component
     function AttendanceRing({ pct }) {
       const radius = 26;
       const circumference = 2 * Math.PI * radius;
@@ -233,8 +213,20 @@
     }
 
     function App() {
+      // License Activation Gate State
+      const [licenseInfo, setLicenseInfo] = useState(() => {
+        try {
+          const saved = localStorage.getItem("tuitiondesk_license");
+          return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+          return null;
+        }
+      });
+      const [licenseInput, setLicenseInput] = useState("");
+      const [licenseError, setLicenseError] = useState("");
+
       const [authStep, setAuthStep] = useState("login");
-      const [userRole, setUserRole] = useState("owner"); // 'owner' | 'parent'
+      const [userRole, setUserRole] = useState("owner");
       const [isParentPreview, setIsParentPreview] = useState(false);
 
       const [institution, setInstitution] = useState({
@@ -253,7 +245,7 @@
       const [auditLogs, setAuditLogs] = useState(INITIAL_AUDIT_LOGS);
       const [selectedBatch, setSelectedBatch] = useState("All");
       const [selectedStudentId, setSelectedStudentId] = useState(1);
-      const [feeFilter, setFeeFilter] = useState("pending"); // 'pending' | 'all'
+      const [feeFilter, setFeeFilter] = useState("pending");
 
       const [parentPhoneLoggedIn, setParentPhoneLoggedIn] = useState("9820111223");
       const linkedChildren = useMemo(() => {
@@ -275,6 +267,31 @@
       const showToast = (msg) => {
         setToast(msg);
         setTimeout(() => setToast(null), 3000);
+      };
+
+      const handleActivateLicense = (e) => {
+        e.preventDefault();
+        const cleaned = licenseInput.trim().toUpperCase();
+        const matched = VALID_LICENSE_KEYS[cleaned];
+        if (!matched) {
+          setLicenseError("Invalid Activation Key. Contact developer to purchase a valid license.");
+          return;
+        }
+        const payload = { key: cleaned, ...matched, activatedAt: new Date().toLocaleDateString() };
+        setLicenseInfo(payload);
+        setLicenseError("");
+        if (matched.persistent) {
+          try {
+            localStorage.setItem("tuitiondesk_license", JSON.stringify(payload));
+          } catch (err) {}
+        }
+        showToast(`Unlocked: ${matched.label}`);
+      };
+
+      const handleDeactivateLicense = () => {
+        try { localStorage.removeItem("tuitiondesk_license"); } catch (err) {}
+        setLicenseInfo(null);
+        setLicenseInput("");
       };
 
       const pendingStudents = useMemo(() => students.filter(s => !s.feePaid), [students]);
@@ -407,22 +424,76 @@
         showToast(`Enrolled ${created.name} (${rollNo})`);
       };
 
+      // =========================================================================
+      // 🔒 STEP 0: ACTIVATION LICENSE LOCK SCREEN (Blocks unauthorized free use)
+      // =========================================================================
+      if (!licenseInfo) {
+        return (
+          <div className="min-h-screen hero-gradient flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-white/20 animate-enter">
+              <div className="hero-gradient p-7 text-white text-center relative overflow-hidden">
+                <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-2xl mx-auto shadow-inner">🔐</div>
+                <h1 className="text-xl font-extrabold mt-3 tracking-tight">TuitionDesk Activation</h1>
+                <p className="text-xs text-indigo-200 mt-1">Licensed Coaching Management Software</p>
+              </div>
+
+              <form onSubmit={handleActivateLicense} className="p-6 space-y-4">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs text-slate-600 leading-relaxed">
+                  Enter the **Institution Activation Key** provided by your software vendor to unlock TuitionDesk on this device.
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Activation License Key</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. TD-PRO-XXXX"
+                    value={licenseInput}
+                    onChange={e => { setLicenseInput(e.target.value); setLicenseError(""); }}
+                    className="w-full mt-1.5 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-extrabold uppercase tracking-widest text-center text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  {licenseError && (
+                    <p className="text-[11px] font-bold text-rose-600 mt-1.5 text-center">{licenseError}</p>
+                  )}
+                </div>
+
+                <button type="submit" className="w-full hero-gradient text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-lg shadow-indigo-600/25 tap-scale">
+                  Verify & Unlock App →
+                </button>
+
+                <div className="pt-3 border-t border-slate-100 text-center space-y-2">
+                  <p className="text-[11px] text-slate-400 font-medium">Don't have an activation key yet?</p>
+                  <a
+                    href={`https://wa.me/${DEVELOPER_WHATSAPP}?text=${encodeURIComponent("Hello! I want to purchase an Activation License Key for the TuitionDesk app.")}`}
+                    target="_blank"
+                    className="inline-block w-full py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-xs rounded-xl tap-scale"
+                  >
+                    💬 Request License Key on WhatsApp ↗
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
       // ================= LOGIN / ONBOARDING SCREEN =================
       if (authStep !== "app") {
         return (
           <div className="min-h-screen hero-gradient flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border border-white/20 animate-enter">
               <div className="hero-gradient p-7 text-white relative overflow-hidden">
-                <div className="absolute -right-8 -top-8 w-36 h-36 bg-indigo-400/20 rounded-full blur-2xl"></div>
                 <div className="flex items-center justify-between relative z-10">
                   <div className="flex items-center gap-2.5">
                     <div className="w-10 h-10 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-xl shadow-inner">🎓</div>
                     <div>
                       <h1 className="text-xl font-extrabold tracking-tight">TuitionDesk</h1>
-                      <p className="text-[11px] text-indigo-200 font-medium">Smart Coaching OS</p>
+                      <p className="text-[11px] text-indigo-200 font-medium">{licenseInfo.label}</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 px-2.5 py-1 rounded-full">v2.5 Pro</span>
+                  <button onClick={handleDeactivateLicense} className="text-[10px] font-bold bg-white/10 hover:bg-white/20 text-indigo-100 px-2.5 py-1 rounded-full">
+                    🔒 Lock
+                  </button>
                 </div>
               </div>
 
@@ -447,7 +518,7 @@
                     <h2 className="text-base font-extrabold text-slate-800">Setup Your Tuition Centre</h2>
                     <div>
                       <label className="text-[11px] font-bold text-slate-500 uppercase">Academy Name</label>
-                      <input type="text" value={institution.name} onChange={e => setInstitution({...institution, name: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                      <input type="text" value={institution.name} onChange={e => setInstitution({...institution, name: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -474,7 +545,7 @@
                       {userRole === "owner" ? (
                         <span>Manage batches, track overdue fees with 1-tap WhatsApp reminders, and verify parent attendance.</span>
                       ) : (
-                        <span>Demo Parent Number <strong>9820111223</strong> has <strong>2 siblings linked</strong> (Aarav & Riya) with UPI fee pay & attendance confirmation.</span>
+                        <span>Demo Parent Number <strong>9820111223</strong> has <strong>2 siblings linked</strong> (Aarav & Riya).</span>
                       )}
                     </div>
 
@@ -482,7 +553,7 @@
                       <label className="text-[11px] font-bold text-slate-500 uppercase">Mobile Number</label>
                       <div className="flex mt-1">
                         <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 text-slate-600 text-sm font-bold">+91</span>
-                        <input type="tel" value={phoneInput} onChange={e => setPhoneInput(e.target.value)} className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-r-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <input type="tel" value={phoneInput} onChange={e => setPhoneInput(e.target.value)} className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-r-xl text-sm font-bold text-slate-800" />
                       </div>
                     </div>
 
@@ -533,7 +604,6 @@
         );
       }
 
-      // Determine whether we are showing Parent Portal (either logged in as Parent OR Owner toggled Preview)
       const showParentPortal = userRole === "parent" || isParentPreview;
       const activePortalStudent = userRole === "parent" ? currentParentChild : selectedStudent;
 
@@ -549,12 +619,10 @@
                     {institution.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <h1 className="text-base font-extrabold tracking-tight leading-none">{institution.name}</h1>
-                    </div>
+                    <h1 className="text-base font-extrabold tracking-tight leading-none">{institution.name}</h1>
                     <p className="text-[11px] text-indigo-200 mt-1 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-                      {showParentPortal ? "Parent Family Portal" : `${students.length} Active Students • ${institution.city}`}
+                      {showParentPortal ? "Parent Family Portal" : `${students.length} Students • ${licenseInfo.type === "demo" ? "DEMO MODE" : "PRO LICENSED"}`}
                     </p>
                   </div>
                 </div>
@@ -574,7 +642,6 @@
                 </div>
               </div>
 
-              {/* Quick KPI Strip inside Header for Owner */}
               {!showParentPortal && (
                 <div className="grid grid-cols-3 gap-2 mt-4">
                   <div className="glass-card rounded-2xl p-2.5">
@@ -593,7 +660,6 @@
               )}
             </header>
 
-            {/* Toast Pill */}
             {toast && (
               <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur-md text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl border border-white/10 animate-enter">
                 ✨ {toast}
@@ -603,10 +669,8 @@
             {/* ================= MAIN BODY ================= */}
             <main className="flex-1 px-4 pt-4 pb-28 overflow-y-auto space-y-4">
 
-              {/* ---------- PARENT PORTAL VIEW ---------- */}
               {showParentPortal ? (
                 <div className="space-y-4 animate-enter">
-                  {/* Admin Preview Banner if Owner is previewing */}
                   {userRole === "owner" && isParentPreview && (
                     <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -615,16 +679,13 @@
                           {students.map(s => <option key={s.id} value={s.id}>{s.rollNo} • {s.name}</option>)}
                         </select>
                       </div>
-                      <button onClick={() => setIsParentPreview(false)} className="text-[11px] font-extrabold bg-amber-900 text-white px-2.5 py-1.5 rounded-xl tap-scale">Exit Preview</button>
+                      <button onClick={() => setIsParentPreview(false)} className="text-[11px] font-extrabold bg-amber-900 text-white px-2.5 py-1.5 rounded-xl tap-scale">Exit</button>
                     </div>
                   )}
 
-                  {/* Multi-Child Sibling Switcher */}
                   {userRole === "parent" && linkedChildren.length > 1 && (
                     <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Select Child ({linkedChildren.length} Enrolled)</span>
-                      </div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 block mb-2">Select Child ({linkedChildren.length} Enrolled)</span>
                       <div className="flex flex-wrap gap-2">
                         {linkedChildren.map((child, idx) => (
                           <button
@@ -640,7 +701,6 @@
                     </div>
                   )}
 
-                  {/* Student Profile & Attendance Ring Card */}
                   <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div className="space-y-1">
                       <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg inline-block">{activePortalStudent.rollNo}</span>
@@ -654,7 +714,6 @@
                     </div>
                   </div>
 
-                  {/* Parent-Confirmed Attendance Card */}
                   <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -672,16 +731,16 @@
 
                     <div className="grid grid-cols-3 gap-2">
                       {[
-                        { label: "Attended", icon: "✓", activeCls: "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" },
-                        { label: "Absent", icon: "✕", activeCls: "bg-rose-600 text-white shadow-md shadow-rose-600/20" },
-                        { label: "Not sure", icon: "?", activeCls: "bg-amber-500 text-white shadow-md shadow-amber-500/20" }
+                        { label: "Attended", icon: "✓", activeCls: "bg-emerald-600 text-white shadow-md" },
+                        { label: "Absent", icon: "✕", activeCls: "bg-rose-600 text-white shadow-md" },
+                        { label: "Not sure", icon: "?", activeCls: "bg-amber-500 text-white shadow-md" }
                       ].map(opt => {
                         const isSelected = activePortalStudent.parentConfirmation.status === opt.label;
                         return (
                           <button
                             key={opt.label}
                             onClick={() => handleParentAttendanceSubmit(activePortalStudent.id, opt.label, activePortalStudent.parentConfirmation.reason)}
-                            className={`py-3 rounded-2xl text-xs font-extrabold transition tap-scale ${isSelected ? opt.activeCls : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                            className={`py-3 rounded-2xl text-xs font-extrabold transition tap-scale ${isSelected ? opt.activeCls : "bg-slate-100 text-slate-600"}`}
                           >
                             {opt.icon} {opt.label}
                           </button>
@@ -697,11 +756,10 @@
                         const val = e.target.value;
                         setStudents(prev => prev.map(s => s.id === activePortalStudent.id ? { ...s, parentConfirmation: { ...s.parentConfirmation, reason: val } } : s));
                       }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-medium"
                     />
                   </div>
 
-                  {/* Fee Due + Pay by UPI Card */}
                   <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div>
                       <p className="text-[11px] font-bold text-slate-400 uppercase">Monthly Fee</p>
@@ -713,14 +771,13 @@
                     ) : (
                       <button
                         onClick={() => { setSelectedStudentId(activePortalStudent.id); setUpiModal(true); }}
-                        className="hero-gradient text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-lg shadow-indigo-600/25 tap-scale"
+                        className="hero-gradient text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-lg tap-scale"
                       >
                         Pay by UPI →
                       </button>
                     )}
                   </div>
 
-                  {/* Interactive Homework Checklist */}
                   <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Homework Checklist</h3>
@@ -745,10 +802,8 @@
                 </div>
               ) : (
                 <>
-                  {/* ---------- TAB 1: FEES ---------- */}
                   {activeTab === "fees" && (
                     <div className="space-y-4 animate-enter">
-                      {/* Bulk WhatsApp CTA Card */}
                       <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between gap-3">
                         <div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">{pendingStudents.length} Overdue</span>
@@ -762,13 +817,12 @@
                             message: `Namaste Parent, gentle reminder from *${institution.name}*. Your ward's monthly tuition fee is overdue. Please pay via UPI to *${institution.upiId}*.`
                           })}
                           disabled={pendingStudents.length === 0}
-                          className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-xs font-extrabold px-4 py-3 rounded-2xl shadow-lg shadow-emerald-600/20 shrink-0 tap-scale"
+                          className="bg-emerald-600 disabled:bg-slate-300 text-white text-xs font-extrabold px-4 py-3 rounded-2xl shadow-lg shrink-0 tap-scale"
                         >
                           💬 Remind All
                         </button>
                       </div>
 
-                      {/* Filter Toggle */}
                       <div className="flex gap-2">
                         <button onClick={() => setFeeFilter("pending")} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${feeFilter === "pending" ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200"}`}>
                           Pending ({pendingStudents.length})
@@ -778,7 +832,6 @@
                         </button>
                       </div>
 
-                      {/* Student Fee Cards */}
                       <div className="space-y-3">
                         {displayedFeeStudents.map(student => (
                           <div key={student.id} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
@@ -804,9 +857,7 @@
                               <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
                                 <span className="text-[11px] text-slate-400 font-medium">{student.parentName} • {student.parentPhone}</span>
                                 <div className="flex gap-1.5">
-                                  <button onClick={() => handleMarkFeePaid(student.id)} className="text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl tap-scale">
-                                    Mark Paid
-                                  </button>
+                                  <button onClick={() => handleMarkFeePaid(student.id)} className="text-[11px] font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl tap-scale">Mark Paid</button>
                                   <button
                                     onClick={() => setWaModal({
                                       title: `WhatsApp Reminder • ${student.rollNo}`,
@@ -826,7 +877,6 @@
                     </div>
                   )}
 
-                  {/* ---------- TAB 2: ATTENDANCE ---------- */}
                   {activeTab === "attendance" && (
                     <div className="space-y-4 animate-enter">
                       <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
@@ -870,17 +920,16 @@
                                   )}
                                 </div>
 
-                                {/* Quick P / A Toggle Buttons */}
                                 <div className="flex gap-1.5 shrink-0">
                                   <button
                                     onClick={() => handleTeacherVerify(student.id, "Teacher Verified")}
-                                    className={`w-10 h-10 rounded-2xl font-extrabold text-xs transition tap-scale ${student.attendanceToday === "P" && tStatus !== "Conflict" ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25" : "bg-slate-100 text-slate-500"}`}
+                                    className={`w-10 h-10 rounded-2xl font-extrabold text-xs transition tap-scale ${student.attendanceToday === "P" && tStatus !== "Conflict" ? "bg-emerald-600 text-white shadow-md" : "bg-slate-100 text-slate-500"}`}
                                   >
                                     P
                                   </button>
                                   <button
                                     onClick={() => handleTeacherVerify(student.id, "Reported Absent")}
-                                    className={`w-10 h-10 rounded-2xl font-extrabold text-xs transition tap-scale ${student.attendanceToday === "A" ? "bg-rose-600 text-white shadow-md shadow-rose-600/25" : "bg-slate-100 text-slate-500"}`}
+                                    className={`w-10 h-10 rounded-2xl font-extrabold text-xs transition tap-scale ${student.attendanceToday === "A" ? "bg-rose-600 text-white shadow-md" : "bg-slate-100 text-slate-500"}`}
                                   >
                                     A
                                   </button>
@@ -904,14 +953,13 @@
                             });
                           }
                         }}
-                        className="w-full hero-gradient text-white font-extrabold py-4 rounded-2xl text-xs shadow-lg shadow-indigo-600/25 tap-scale"
+                        className="w-full hero-gradient text-white font-extrabold py-4 rounded-2xl text-xs shadow-lg tap-scale"
                       >
                         Save Attendance & Alert Unreported Absentees
                       </button>
                     </div>
                   )}
 
-                  {/* ---------- TAB 3: TESTS ---------- */}
                   {activeTab === "tests" && (
                     <div className="space-y-4 animate-enter">
                       <div className="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-100">
@@ -934,7 +982,6 @@
                         </div>
                       </div>
 
-                      {/* Gradient Bar Chart for Last 6 Tests */}
                       <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">6-Week Score Trend</h3>
@@ -948,7 +995,7 @@
                                 <span className={`text-[10px] font-extrabold ${isLatest ? "text-indigo-700" : "text-slate-500"}`}>{t.score}</span>
                                 <div
                                   style={{ height: `${Math.max(t.score * 1.25, 18)}px` }}
-                                  className={`w-full rounded-t-xl transition-all duration-500 ${isLatest ? "hero-gradient shadow-md shadow-indigo-500/30" : "bg-indigo-100"}`}
+                                  className={`w-full rounded-t-xl transition-all duration-500 ${isLatest ? "hero-gradient shadow-md" : "bg-indigo-100"}`}
                                 ></div>
                               </div>
                             );
@@ -970,31 +1017,37 @@
                             message: `📊 *Weekly Report Card — ${institution.name}*\nStudent: *${selectedStudent.name}* (${selectedStudent.rollNo})\nTopic: ${latest.topic}\nScore: *${latest.score}/100*\nClass Rank: *#${selectedStudent.rank}*\nAttendance: ${selectedStudent.attendancePct}%`
                           });
                         }}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-2xl text-xs shadow-lg shadow-emerald-600/20 tap-scale"
+                        className="w-full bg-emerald-600 text-white font-extrabold py-4 rounded-2xl text-xs shadow-lg tap-scale"
                       >
                         💬 Share Report Card on WhatsApp
                       </button>
                     </div>
                   )}
 
-                  {/* ---------- TAB 4: OWNER DASHBOARD ---------- */}
                   {activeTab === "owner" && (
                     <div className="space-y-4 animate-enter">
-                      {/* Parent Portal Preview Launcher */}
+                      {/* License Status Card */}
+                      <div className="bg-slate-900 text-white p-4 rounded-3xl flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">● Active License</span>
+                          <p className="text-sm font-extrabold mt-0.5">{licenseInfo.label}</p>
+                          <p className="text-[11px] text-slate-400">Key: {licenseInfo.key}</p>
+                        </div>
+                        <button onClick={handleDeactivateLicense} className="text-[11px] font-bold bg-white/10 hover:bg-white/20 px-3 py-2 rounded-xl">
+                          Lock Device
+                        </button>
+                      </div>
+
                       <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-3xl flex items-center justify-between gap-3">
                         <div>
                           <h3 className="text-xs font-extrabold text-indigo-950">Parent Portal Simulator</h3>
                           <p className="text-[11px] text-indigo-700 mt-0.5">Preview UPI payment & parent check-in view</p>
                         </div>
-                        <button
-                          onClick={() => setIsParentPreview(true)}
-                          className="hero-gradient text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl shadow-md shrink-0 tap-scale"
-                        >
+                        <button onClick={() => setIsParentPreview(true)} className="hero-gradient text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl shadow-md shrink-0 tap-scale">
                           Preview View →
                         </button>
                       </div>
 
-                      {/* Collection Progress Bar */}
                       <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
                         <div className="flex justify-between items-end">
                           <div>
@@ -1012,7 +1065,6 @@
                         </div>
                       </div>
 
-                      {/* New Referral Enquiries */}
                       <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
                         <div className="flex items-center justify-between">
                           <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">New Referral Enquiries</h3>
@@ -1035,7 +1087,6 @@
                         ))}
                       </div>
 
-                      {/* Audit Trail */}
                       <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-2.5">
                         <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Security & Attendance Audit Log</h3>
                         <div className="space-y-2 max-h-44 overflow-y-auto no-scrollbar">
@@ -1070,7 +1121,7 @@
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex flex-col items-center py-1.5 px-4 rounded-2xl transition tap-scale ${active ? "hero-gradient text-white shadow-md shadow-indigo-600/25" : "text-slate-400 font-semibold"}`}
+                      className={`flex flex-col items-center py-1.5 px-4 rounded-2xl transition tap-scale ${active ? "hero-gradient text-white shadow-md" : "text-slate-400 font-semibold"}`}
                     >
                       <span className="text-sm font-extrabold">{tab.icon}</span>
                       <span className="text-[10px] font-bold mt-0.5">{tab.label}</span>
