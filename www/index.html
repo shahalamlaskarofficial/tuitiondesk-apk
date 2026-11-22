@@ -43,18 +43,45 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useMemo, useEffect } = React;
+    const { useState, useMemo } = React;
 
     // =========================================================================
-    // 🔒 DEVELOPER LICENSE KEYS (Change or add keys here for paying clients)
+    // 🔒 HIDDEN LICENSE ENGINE (Secret Salt + Formula — No Code Edits Needed!)
     // =========================================================================
-    const DEVELOPER_WHATSAPP = "919101318482"; // Your WhatsApp number for "Buy License" button
-    const VALID_LICENSE_KEYS = {
-      "DEMO-2026": { type: "demo", label: "24-Hour Pitch Demo", persistent: false },
-      "TD-PRO-9910": { type: "pro", label: "Lifetime Pro License", persistent: true },
-      "TD-VIP-7741": { type: "pro", label: "Annual Pro License", persistent: true },
-      "TD-PLUS-5520": { type: "pro", label: "Standard Coaching License", persistent: true }
-    };
+    const DEVELOPER_WHATSAPP = "919101318482";
+    const SECRET_SALT = "SHAHALAM_TD_2026";
+
+    function computeSignature(clientCode) {
+      const clean = clientCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (!clean) return "";
+      const raw = `${clean}:${SECRET_SALT}`;
+      let hash = 0;
+      for (let i = 0; i < raw.length; i++) {
+        hash = (hash * 31 + raw.charCodeAt(i)) % 9000;
+      }
+      return String(1000 + Math.abs(hash));
+    }
+
+    function generateClientKey(clientName) {
+      const code = clientName.trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || "CLIENT";
+      const sig = computeSignature(code);
+      return `TD-${code}-${sig}`;
+    }
+
+    function validateLicenseKey(inputKey) {
+      const cleaned = inputKey.trim().toUpperCase();
+      if (cleaned === "DEMO26") {
+        return { valid: true, type: "demo", label: "24-Hour Pitch Demo", persistent: false, clientCode: "DEMO" };
+      }
+      const parts = cleaned.split("-");
+      if (parts.length === 3 && parts[0] === "TD") {
+        const [, code, sig] = parts;
+        if (code && sig && computeSignature(code) === sig) {
+          return { valid: true, type: "pro", label: `Pro License (${code})`, persistent: true, clientCode: code };
+        }
+      }
+      return { valid: false };
+    }
 
     const INITIAL_STUDENTS = [
       {
@@ -216,7 +243,7 @@
       // License Activation Gate State
       const [licenseInfo, setLicenseInfo] = useState(() => {
         try {
-          const saved = localStorage.getItem("tuitiondesk_license");
+          const saved = localStorage.getItem("tuitiondesk_license_v2");
           return saved ? JSON.parse(saved) : null;
         } catch (e) {
           return null;
@@ -224,6 +251,12 @@
       });
       const [licenseInput, setLicenseInput] = useState("");
       const [licenseError, setLicenseError] = useState("");
+
+      // Secret 5-Tap Developer Key Generator State
+      const [secretTapCount, setSecretTapCount] = useState(0);
+      const [showDevVault, setShowDevVault] = useState(false);
+      const [devClientName, setDevClientName] = useState("");
+      const [generatedKey, setGeneratedKey] = useState("");
 
       const [authStep, setAuthStep] = useState("login");
       const [userRole, setUserRole] = useState("owner");
@@ -269,27 +302,37 @@
         setTimeout(() => setToast(null), 3000);
       };
 
+      const handleSecretLockTap = () => {
+        const next = secretTapCount + 1;
+        if (next >= 5) {
+          setSecretTapCount(0);
+          setShowDevVault(true);
+        } else {
+          setSecretTapCount(next);
+          setTimeout(() => setSecretTapCount(0), 2500);
+        }
+      };
+
       const handleActivateLicense = (e) => {
         e.preventDefault();
-        const cleaned = licenseInput.trim().toUpperCase();
-        const matched = VALID_LICENSE_KEYS[cleaned];
-        if (!matched) {
-          setLicenseError("Invalid Activation Key. Contact developer to purchase a valid license.");
+        const result = validateLicenseKey(licenseInput);
+        if (!result.valid) {
+          setLicenseError("Invalid Key. Contact vendor for a valid license.");
           return;
         }
-        const payload = { key: cleaned, ...matched, activatedAt: new Date().toLocaleDateString() };
+        const payload = { key: licenseInput.trim().toUpperCase(), ...result, activatedAt: new Date().toLocaleDateString() };
         setLicenseInfo(payload);
         setLicenseError("");
-        if (matched.persistent) {
+        if (result.persistent) {
           try {
-            localStorage.setItem("tuitiondesk_license", JSON.stringify(payload));
+            localStorage.setItem("tuitiondesk_license_v2", JSON.stringify(payload));
           } catch (err) {}
         }
-        showToast(`Unlocked: ${matched.label}`);
+        showToast(`Unlocked: ${result.label}`);
       };
 
       const handleDeactivateLicense = () => {
-        try { localStorage.removeItem("tuitiondesk_license"); } catch (err) {}
+        try { localStorage.removeItem("tuitiondesk_license_v2"); } catch (err) {}
         setLicenseInfo(null);
         setLicenseInput("");
       };
@@ -425,29 +468,36 @@
       };
 
       // =========================================================================
-      // 🔒 STEP 0: ACTIVATION LICENSE LOCK SCREEN (Blocks unauthorized free use)
+      // 🔒 STEP 0: ACTIVATION LICENSE LOCK SCREEN + HIDDEN 5-TAP KEY GENERATOR
       // =========================================================================
       if (!licenseInfo) {
         return (
           <div className="min-h-screen hero-gradient flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-white/20 animate-enter">
               <div className="hero-gradient p-7 text-white text-center relative overflow-hidden">
-                <div className="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-2xl mx-auto shadow-inner">🔐</div>
+                {/* Tap this lock icon 5 times quickly to open your hidden Developer Key Generator */}
+                <button
+                  type="button"
+                  onClick={handleSecretLockTap}
+                  className="w-14 h-14 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-2xl mx-auto shadow-inner active:scale-90 transition"
+                >
+                  🔐
+                </button>
                 <h1 className="text-xl font-extrabold mt-3 tracking-tight">TuitionDesk Activation</h1>
                 <p className="text-xs text-indigo-200 mt-1">Licensed Coaching Management Software</p>
               </div>
 
               <form onSubmit={handleActivateLicense} className="p-6 space-y-4">
                 <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs text-slate-600 leading-relaxed">
-                  Enter the **Institution Activation Key** provided by your software vendor to unlock TuitionDesk on this device.
+                  Enter the <strong>Activation License Key</strong> provided by your software vendor to unlock TuitionDesk on this device.
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Activation License Key</label>
+                  <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Activation Key</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. TD-PRO-XXXX"
+                    placeholder="TD-XXXXXX-XXXX"
                     value={licenseInput}
                     onChange={e => { setLicenseInput(e.target.value); setLicenseError(""); }}
                     className="w-full mt-1.5 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-extrabold uppercase tracking-widest text-center text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -462,17 +512,87 @@
                 </button>
 
                 <div className="pt-3 border-t border-slate-100 text-center space-y-2">
-                  <p className="text-[11px] text-slate-400 font-medium">Don't have an activation key yet?</p>
+                  <p className="text-[11px] text-slate-400 font-medium">Need an activation key for your tuition centre?</p>
                   <a
-                    href={`https://wa.me/${DEVELOPER_WHATSAPP}?text=${encodeURIComponent("Hello! I want to purchase an Activation License Key for the TuitionDesk app.")}`}
+                    href={`https://wa.me/${DEVELOPER_WHATSAPP}?text=${encodeURIComponent("Hello! I want to purchase an Activation License Key for TuitionDesk.")}`}
                     target="_blank"
                     className="inline-block w-full py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-xs rounded-xl tap-scale"
                   >
-                    💬 Request License Key on WhatsApp ↗
+                    💬 Request Key on WhatsApp ↗
                   </a>
                 </div>
               </form>
             </div>
+
+            {/* SECRET DEVELOPER KEY GENERATOR MODAL (Only opens on 5 taps on 🔐) */}
+            {showDevVault && (
+              <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div className="bg-slate-900 text-white border border-slate-700 w-full max-w-sm rounded-[2rem] p-6 space-y-4 shadow-2xl animate-enter">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400">Developer Vault</span>
+                      <h3 className="text-base font-extrabold">Client Key Generator</h3>
+                    </div>
+                    <button onClick={() => setShowDevVault(false)} className="text-xs bg-slate-800 px-3 py-1.5 rounded-xl text-slate-300 font-bold">Close</button>
+                  </div>
+
+                  <p className="text-xs text-slate-400">Type a client/academy name below to instantly generate a permanent unlock key (no rebuild required):</p>
+
+                  <input
+                    type="text"
+                    placeholder="e.g. SHARMA or APEX"
+                    value={devClientName}
+                    onChange={e => setDevClientName(e.target.value)}
+                    className="w-full px-3.5 py-3 bg-slate-800 border border-slate-700 rounded-xl text-sm font-extrabold uppercase text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setGeneratedKey(generateClientKey(devClientName))}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 rounded-xl text-xs shadow-md"
+                  >
+                    Generate Client License Key
+                  </button>
+
+                  {generatedKey && (
+                    <div className="bg-slate-800 border border-emerald-500/40 p-3.5 rounded-2xl text-center space-y-2">
+                      <p className="text-[10px] text-emerald-400 font-bold uppercase">Generated Key Ready</p>
+                      <p className="text-base font-extrabold tracking-widest text-white select-all">{generatedKey}</p>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLicenseInput(generatedKey);
+                            setShowDevVault(false);
+                          }}
+                          className="flex-1 bg-emerald-600 text-white text-[11px] font-extrabold py-2 rounded-xl"
+                        >
+                          Use Now
+                        </button>
+                        <a
+                          href={`https://wa.me/?text=${encodeURIComponent(`Your TuitionDesk Pro Activation Key is: *${generatedKey}*`)}`}
+                          target="_blank"
+                          className="flex-1 bg-slate-700 text-white text-[11px] font-extrabold py-2 rounded-xl"
+                        >
+                          Share ↗
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
+                    <span>Quick Pitch Key: <strong className="text-amber-300">DEMO26</strong></span>
+                    <button
+                      type="button"
+                      onClick={() => { setLicenseInput("DEMO26"); setShowDevVault(false); }}
+                      className="text-indigo-400 font-bold underline"
+                    >
+                      Fill Demo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
       }
@@ -1026,7 +1146,6 @@
 
                   {activeTab === "owner" && (
                     <div className="space-y-4 animate-enter">
-                      {/* License Status Card */}
                       <div className="bg-slate-900 text-white p-4 rounded-3xl flex items-center justify-between">
                         <div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">● Active License</span>
