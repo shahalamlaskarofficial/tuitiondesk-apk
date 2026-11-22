@@ -3,17 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#4F46E5" />
+  <meta name="theme-color" content="#1E1B4B" />
   <title>TuitionDesk</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0F172A; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #090D16;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
+    }
+    .tap-scale { transition: transform 0.12s ease, box-shadow 0.15s ease; }
+    .tap-scale:active { transform: scale(0.97); }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-enter { animation: slideUp 0.25s ease-out forwards; }
   </style>
 </head>
 <body>
@@ -35,8 +58,8 @@
         daysLate: 11,
         feePaid: false,
         attendanceToday: "P",
-        parentConfirmation: { status: "Attended", reason: "", timestamp: "26 Oct 2026, 3:30 PM", locked: true },
-        teacherVerification: { status: "Teacher Verified", verifiedBy: "Teacher Rajesh", timestamp: "26 Oct 2026, 4:15 PM" },
+        parentConfirmation: { status: "Attended", reason: "", timestamp: "26 Oct, 3:30 PM", locked: true },
+        teacherVerification: { status: "Teacher Verified", verifiedBy: "Teacher Rajesh", timestamp: "26 Oct, 4:15 PM" },
         attendancePct: 92,
         homework: [
           { id: 101, subject: "Maths", task: "Ex 4.2 Quadratic Equations (Q1-Q8)", done: true },
@@ -44,12 +67,12 @@
           { id: 103, subject: "Chemistry", task: "Revise Chemical Reactions Balancing", done: true }
         ],
         testScores: [
-          { test: "T1", score: 74, max: 100, topic: "Real Numbers" },
-          { test: "T2", score: 78, max: 100, topic: "Polynomials" },
-          { test: "T3", score: 82, max: 100, topic: "Light - Reflection" },
-          { test: "T4", score: 79, max: 100, topic: "Linear Equations" },
-          { test: "T5", score: 86, max: 100, topic: "Acids & Bases" },
-          { test: "T6", score: 91, max: 100, topic: "Quadratic Eq." }
+          { test: "T1", score: 74, topic: "Real Numbers" },
+          { test: "T2", score: 78, topic: "Polynomials" },
+          { test: "T3", score: 82, topic: "Light - Reflection" },
+          { test: "T4", score: 79, topic: "Linear Equations" },
+          { test: "T5", score: 86, topic: "Acids & Bases" },
+          { test: "T6", score: 91, topic: "Quadratic Eq." }
         ],
         rank: 2
       },
@@ -68,8 +91,18 @@
         parentConfirmation: { status: "Unconfirmed", reason: "", timestamp: null, locked: false },
         teacherVerification: { status: "Unconfirmed", verifiedBy: null, timestamp: null },
         attendancePct: 95,
-        homework: [{ id: 1001, subject: "Maths", task: "Lines and Angles Ex 6.1", done: true }],
-        testScores: [{ test: "T1", score: 85, max: 100, topic: "Number System" }],
+        homework: [
+          { id: 1001, subject: "Maths", task: "Lines and Angles Ex 6.1", done: true },
+          { id: 1002, subject: "Science", task: "Motion Graphs Practice Sheet", done: false }
+        ],
+        testScores: [
+          { test: "T1", score: 80, topic: "Number System" },
+          { test: "T2", score: 82, topic: "Motion" },
+          { test: "T3", score: 84, topic: "Atoms" },
+          { test: "T4", score: 81, topic: "Lines & Angles" },
+          { test: "T5", score: 88, topic: "Force" },
+          { test: "T6", score: 90, topic: "Triangles" }
+        ],
         rank: 1
       },
       {
@@ -84,21 +117,20 @@
         daysLate: 6,
         feePaid: false,
         attendanceToday: "A",
-        parentConfirmation: { status: "Absent", reason: "Fever and mild cold", timestamp: "26 Oct 2026, 2:10 PM", locked: true },
-        teacherVerification: { status: "Reported Absent", verifiedBy: "System (Parent Reported)", timestamp: "26 Oct 2026, 2:10 PM" },
+        parentConfirmation: { status: "Absent", reason: "Fever and mild cold", timestamp: "26 Oct, 2:10 PM", locked: true },
+        teacherVerification: { status: "Reported Absent", verifiedBy: "Parent Reported", timestamp: "26 Oct, 2:10 PM" },
         attendancePct: 85,
         homework: [
           { id: 201, subject: "Maths", task: "Ex 4.2 Quadratic Equations (Q1-Q8)", done: true },
-          { id: 202, subject: "Physics", task: "Light Reflection Numericals Worksheet", done: true },
-          { id: 203, subject: "Chemistry", task: "Revise Chemical Reactions Balancing", done: true }
+          { id: 202, subject: "Physics", task: "Light Reflection Numericals Worksheet", done: true }
         ],
         testScores: [
-          { test: "T1", score: 88, max: 100, topic: "Real Numbers" },
-          { test: "T2", score: 90, max: 100, topic: "Polynomials" },
-          { test: "T3", score: 85, max: 100, topic: "Light - Reflection" },
-          { test: "T4", score: 92, max: 100, topic: "Linear Equations" },
-          { test: "T5", score: 94, max: 100, topic: "Acids & Bases" },
-          { test: "T6", score: 95, max: 100, topic: "Quadratic Eq." }
+          { test: "T1", score: 88, topic: "Real Numbers" },
+          { test: "T2", score: 90, topic: "Polynomials" },
+          { test: "T3", score: 85, topic: "Light" },
+          { test: "T4", score: 92, topic: "Linear Eq." },
+          { test: "T5", score: 94, topic: "Acids & Bases" },
+          { test: "T6", score: 95, topic: "Quadratic Eq." }
         ],
         rank: 1
       },
@@ -114,40 +146,99 @@
         daysLate: 16,
         feePaid: false,
         attendanceToday: "P",
-        parentConfirmation: { status: "Not sure", reason: "Left home early, need confirmation", timestamp: "26 Oct 2026, 1:00 PM", locked: false },
-        teacherVerification: { status: "Conflict", verifiedBy: "Pending Verification", timestamp: null },
+        parentConfirmation: { status: "Not sure", reason: "Left home early, please confirm", timestamp: "26 Oct, 1:00 PM", locked: false },
+        teacherVerification: { status: "Conflict", verifiedBy: "Needs Review", timestamp: null },
         attendancePct: 78,
         homework: [
           { id: 301, subject: "Maths", task: "Lines and Angles Theorem Proof", done: false },
           { id: 302, subject: "Science", task: "Atoms & Molecules Valency Chart", done: false }
         ],
         testScores: [
-          { test: "T1", score: 62, max: 100, topic: "Number System" },
-          { test: "T2", score: 65, max: 100, topic: "Motion" },
-          { test: "T3", score: 60, max: 100, topic: "Matter Around Us" },
-          { test: "T4", score: 68, max: 100, topic: "Force & Laws" },
-          { test: "T5", score: 72, max: 100, topic: "Triangles" },
-          { test: "T6", score: 75, max: 100, topic: "Gravitation" }
+          { test: "T1", score: 62, topic: "Number System" },
+          { test: "T2", score: 65, topic: "Motion" },
+          { test: "T3", score: 60, topic: "Matter" },
+          { test: "T4", score: 68, topic: "Force" },
+          { test: "T5", score: 72, topic: "Triangles" },
+          { test: "T6", score: 75, topic: "Gravitation" }
         ],
         rank: 5
+      },
+      {
+        id: 4,
+        rollNo: "TD-2026-105",
+        name: "Ananya Iyer",
+        batch: "Class 9 - Foundation (5:30 PM)",
+        parentName: "Karthik Iyer",
+        parentPhone: "9840011229",
+        feeAmount: 2200,
+        dueDate: "05 Oct 2026",
+        daysLate: 0,
+        feePaid: true,
+        attendanceToday: "P",
+        parentConfirmation: { status: "Attended", reason: "", timestamp: "26 Oct, 3:00 PM", locked: true },
+        teacherVerification: { status: "Teacher Verified", verifiedBy: "Teacher Rajesh", timestamp: "26 Oct, 5:45 PM" },
+        attendancePct: 96,
+        homework: [
+          { id: 401, subject: "Maths", task: "Lines and Angles Theorem Proof", done: true },
+          { id: 402, subject: "Science", task: "Atoms & Molecules Valency Chart", done: true }
+        ],
+        testScores: [
+          { test: "T1", score: 80, topic: "Number System" },
+          { test: "T2", score: 83, topic: "Motion" },
+          { test: "T3", score: 85, topic: "Matter" },
+          { test: "T4", score: 84, topic: "Force" },
+          { test: "T5", score: 89, topic: "Triangles" },
+          { test: "T6", score: 88, topic: "Gravitation" }
+        ],
+        rank: 3
       }
     ];
 
     const INITIAL_REFERRALS = [
-      { id: 1, studentName: "Vivaan Kulkarni", className: "Class 10", referredBy: "Aarav Patel (Parent)", phone: "9823019283", status: "New" },
-      { id: 2, studentName: "Sneha Deshmukh", className: "Class 9", referredBy: "Ananya Iyer", phone: "9819283746", status: "Demo Scheduled" }
+      { id: 1, studentName: "Vivaan Kulkarni", className: "Class 10", referredBy: "Aarav Patel (Parent)", phone: "9823019283", status: "New Lead" },
+      { id: 2, studentName: "Sneha Deshmukh", className: "Class 9", referredBy: "Ananya Iyer", phone: "9819283746", status: "Demo Booked" }
     ];
 
     const INITIAL_AUDIT_LOGS = [
-      { id: 1, timestamp: "26 Oct 2026, 2:10 PM", actor: "Meena Sharma (Parent)", action: "Parent Confirmation: Absent", details: "[TD-2026-103] Diya Sharma marked Absent. Reason: Fever and mild cold." },
-      { id: 2, timestamp: "26 Oct 2026, 3:30 PM", actor: "Rajesh Patel (Parent)", action: "Parent Confirmation: Attended", details: "[TD-2026-101] Aarav Patel marked Attended." }
+      { id: 1, timestamp: "26 Oct, 2:10 PM", actor: "Meena Sharma (Parent)", action: "Reported Absent", details: "[TD-2026-103] Diya Sharma • Fever and mild cold" },
+      { id: 2, timestamp: "26 Oct, 3:30 PM", actor: "Rajesh Patel (Parent)", action: "Confirmed Attended", details: "[TD-2026-101] Aarav Patel" },
+      { id: 3, timestamp: "26 Oct, 4:15 PM", actor: "Teacher Rajesh", action: "Verified Present", details: "[TD-2026-101] Aarav Patel" }
     ];
+
+    // Circular Attendance Ring Component
+    function AttendanceRing({ pct }) {
+      const radius = 26;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (pct / 100) * circumference;
+      const strokeColor = pct >= 85 ? "#10B981" : pct >= 75 ? "#F59E0B" : "#EF4444";
+
+      return (
+        <div className="relative inline-flex items-center justify-center">
+          <svg className="w-16 h-16 -rotate-90">
+            <circle cx="32" cy="32" r={radius} stroke="#E2E8F0" strokeWidth="6" fill="transparent" />
+            <circle
+              cx="32" cy="32" r={radius}
+              stroke={strokeColor}
+              strokeWidth="6"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              fill="transparent"
+              className="transition-all duration-700 ease-out"
+            />
+          </svg>
+          <span className="absolute text-xs font-extrabold text-slate-800">{pct}%</span>
+        </div>
+      );
+    }
 
     function App() {
       const [authStep, setAuthStep] = useState("login");
-      const [userRole, setUserRole] = useState("owner");
+      const [userRole, setUserRole] = useState("owner"); // 'owner' | 'parent'
+      const [isParentPreview, setIsParentPreview] = useState(false);
+
       const [institution, setInstitution] = useState({
-        name: "Vidya Vihar Coaching Centre",
+        name: "Vidya Vihar Academy",
         city: "Pune",
         upiId: "vidyavihar@okaxis",
         ownerPhone: "9820098200"
@@ -162,7 +253,8 @@
       const [auditLogs, setAuditLogs] = useState(INITIAL_AUDIT_LOGS);
       const [selectedBatch, setSelectedBatch] = useState("All");
       const [selectedStudentId, setSelectedStudentId] = useState(1);
-      
+      const [feeFilter, setFeeFilter] = useState("pending"); // 'pending' | 'all'
+
       const [parentPhoneLoggedIn, setParentPhoneLoggedIn] = useState("9820111223");
       const linkedChildren = useMemo(() => {
         if (userRole === "parent") {
@@ -170,7 +262,7 @@
         }
         return students;
       }, [students, userRole, parentPhoneLoggedIn]);
-      
+
       const [activeChildIndex, setActiveChildIndex] = useState(0);
       const currentParentChild = linkedChildren[activeChildIndex] || linkedChildren[0] || students[0];
 
@@ -182,10 +274,11 @@
 
       const showToast = (msg) => {
         setToast(msg);
-        setTimeout(() => setToast(null), 3200);
+        setTimeout(() => setToast(null), 3000);
       };
 
       const pendingStudents = useMemo(() => students.filter(s => !s.feePaid), [students]);
+      const displayedFeeStudents = useMemo(() => feeFilter === "pending" ? pendingStudents : students, [feeFilter, pendingStudents, students]);
       const selectedStudent = useMemo(() => students.find(s => s.id === Number(selectedStudentId)) || students[0], [students, selectedStudentId]);
 
       const filteredAttendanceStudents = useMemo(() => {
@@ -208,8 +301,7 @@
         const target = students.find(s => s.id === studentId);
         if (!target) return;
 
-        const nowStr = "26 Oct 2026, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
+        const nowStr = "26 Oct, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         setStudents(prev => prev.map(s => {
           if (s.id === studentId) {
             const newTeacherStatus = status === "Absent" ? "Reported Absent" : (status === "Attended" ? "Teacher Verified" : "Conflict");
@@ -223,21 +315,21 @@
           return s;
         }));
 
-        const auditEntry = {
+        setAuditLogs(prev => [{
           id: Date.now(),
           timestamp: nowStr,
           actor: `${target.parentName} (Parent)`,
-          action: `Parent Confirmation: ${status}`,
-          details: `[${target.rollNo}] ${target.name} marked ${status}.${reason ? ` Reason: ${reason}` : ""}`
-        };
-        setAuditLogs(prev => [auditEntry, ...prev]);
-        showToast(`Attendance submitted as "${status}" for ${target.rollNo} ${target.name}!`);
+          action: `Marked ${status}`,
+          details: `[${target.rollNo}] ${target.name}${reason ? ` • ${reason}` : ""}`
+        }, ...prev]);
+
+        showToast(`Confirmed "${status}" for ${target.name}`);
       };
 
       const handleTeacherVerify = (id, newStatus) => {
         const target = students.find(s => s.id === id);
         if (!target) return;
-        const nowStr = "26 Oct 2026, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const nowStr = "26 Oct, " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         setStudents(prev => prev.map(s => {
           if (s.id === id) {
@@ -250,33 +342,42 @@
           return s;
         }));
 
-        const auditEntry = {
+        setAuditLogs(prev => [{
           id: Date.now() + Math.random(),
           timestamp: nowStr,
           actor: "Teacher Rajesh",
-          action: `Teacher Verification: ${newStatus}`,
-          details: `[${target.rollNo}] ${target.name} updated to ${newStatus}.`
-        };
-        setAuditLogs(prev => [auditEntry, ...prev]);
-        showToast(`Updated ${target.rollNo} ${target.name} to "${newStatus}"`);
+          action: newStatus,
+          details: `[${target.rollNo}] ${target.name}`
+        }, ...prev]);
+
+        showToast(`${target.name}: ${newStatus}`);
       };
 
       const handleMarkFeePaid = (id) => {
         setStudents(prev => prev.map(s => s.id === id ? { ...s, feePaid: true, daysLate: 0 } : s));
         setUpiModal(false);
-        showToast("Payment Successful! Fee status updated.");
+        showToast("Fee marked as PAID!");
+      };
+
+      const handleToggleHomework = (studentId, hwId) => {
+        setStudents(prev => prev.map(s => {
+          if (s.id === studentId) {
+            return {
+              ...s,
+              homework: s.homework.map(h => h.id === hwId ? { ...h, done: !h.done } : h)
+            };
+          }
+          return s;
+        }));
       };
 
       const handleAddStudent = (e) => {
         e.preventDefault();
         if (!newStudent.name || !newStudent.parentPhone) return;
-
-        const nextRollNum = 101 + students.length;
-        const rollNo = `TD-2026-${nextRollNum}`;
-
+        const rollNo = `TD-2026-${101 + students.length}`;
         const created = {
           id: Date.now(),
-          rollNo: rollNo,
+          rollNo,
           name: newStudent.name,
           batch: newStudent.batch,
           parentName: newStudent.parentName || "Parent",
@@ -289,127 +390,139 @@
           parentConfirmation: { status: "Unconfirmed", reason: "", timestamp: null, locked: false },
           teacherVerification: { status: "Unconfirmed", verifiedBy: null, timestamp: null },
           attendancePct: 100,
-          homework: [{ id: 901, subject: "Maths", task: "Welcome Assessment Sheet", done: false }],
-          testScores: [{ test: "T1", score: 85, max: 100, topic: "Baseline Test" }],
+          homework: [{ id: Date.now() + 1, subject: "Maths", task: "Orientation Practice Worksheet", done: false }],
+          testScores: [
+            { test: "T1", score: 78, topic: "Intro" },
+            { test: "T2", score: 82, topic: "Basics" },
+            { test: "T3", score: 80, topic: "Algebra" },
+            { test: "T4", score: 85, topic: "Geometry" },
+            { test: "T5", score: 88, topic: "Mensuration" },
+            { test: "T6", score: 90, topic: "Baseline" }
+          ],
           rank: students.length + 1
         };
-
         setStudents(prev => [created, ...prev]);
         setAddStudentModal(false);
         setNewStudent({ name: "", batch: "Class 10 - Maths & Sci (4 PM)", parentName: "", parentPhone: "", feeAmount: 2500 });
-        showToast(`Registered ${created.name} with Roll No: ${rollNo}!`);
+        showToast(`Enrolled ${created.name} (${rollNo})`);
       };
 
+      // ================= LOGIN / ONBOARDING SCREEN =================
       if (authStep !== "app") {
         return (
-          <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
-              <div className="bg-indigo-600 p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider bg-indigo-500 px-2.5 py-1 rounded-full">TuitionDesk</span>
-                  <span className="text-xs text-indigo-200">Roll No System</span>
+          <div className="min-h-screen hero-gradient flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border border-white/20 animate-enter">
+              <div className="hero-gradient p-7 text-white relative overflow-hidden">
+                <div className="absolute -right-8 -top-8 w-36 h-36 bg-indigo-400/20 rounded-full blur-2xl"></div>
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center text-xl shadow-inner">🎓</div>
+                    <div>
+                      <h1 className="text-xl font-extrabold tracking-tight">TuitionDesk</h1>
+                      <p className="text-[11px] text-indigo-200 font-medium">Smart Coaching OS</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 px-2.5 py-1 rounded-full">v2.5 Pro</span>
                 </div>
-                <h1 className="text-2xl font-extrabold mt-3">TuitionDesk</h1>
-                <p className="text-indigo-100 text-xs mt-1">Coaching Management with Sequential Roll Nos</p>
               </div>
 
               <div className="p-6">
-                <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl mb-6">
+                <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1.5 rounded-2xl mb-5">
                   <button
                     onClick={() => { setAuthStep("login"); setUserRole("owner"); setOtpSent(false); setPhoneInput("9820098200"); }}
-                    className={`py-2.5 text-xs font-bold rounded-lg transition ${userRole === "owner" && authStep !== "register_inst" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600"}`}
+                    className={`py-2.5 text-xs font-bold rounded-xl transition tap-scale ${userRole === "owner" && authStep !== "register_inst" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500"}`}
                   >
-                    👨‍🏫 Tuition Owner
+                    👨‍🏫 Teacher / Owner
                   </button>
                   <button
                     onClick={() => { setAuthStep("login"); setUserRole("parent"); setOtpSent(false); setPhoneInput("9820111223"); }}
-                    className={`py-2.5 text-xs font-bold rounded-lg transition ${userRole === "parent" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600"}`}
+                    className={`py-2.5 text-xs font-bold rounded-xl transition tap-scale ${userRole === "parent" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500"}`}
                   >
                     👪 Parent Portal
                   </button>
                 </div>
 
                 {authStep === "register_inst" ? (
-                  <div className="space-y-4">
-                    <h2 className="text-base font-bold text-slate-800">Register New Tuition Centre</h2>
+                  <div className="space-y-3.5 animate-enter">
+                    <h2 className="text-base font-extrabold text-slate-800">Setup Your Tuition Centre</h2>
                     <div>
-                      <label className="text-xs font-semibold text-slate-600">Institution Name</label>
-                      <input type="text" value={institution.name} onChange={e => setInstitution({...institution, name: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm" />
+                      <label className="text-[11px] font-bold text-slate-500 uppercase">Academy Name</label>
+                      <input type="text" value={institution.name} onChange={e => setInstitution({...institution, name: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs font-semibold text-slate-600">City</label>
-                        <input type="text" value={institution.city} onChange={e => setInstitution({...institution, city: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm" />
+                        <label className="text-[11px] font-bold text-slate-500 uppercase">City</label>
+                        <input type="text" value={institution.city} onChange={e => setInstitution({...institution, city: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold" />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-slate-600">Owner Phone</label>
-                        <input type="text" value={institution.ownerPhone} onChange={e => setInstitution({...institution, ownerPhone: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm" />
+                        <label className="text-[11px] font-bold text-slate-500 uppercase">WhatsApp No.</label>
+                        <input type="text" value={institution.ownerPhone} onChange={e => setInstitution({...institution, ownerPhone: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold" />
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-slate-600">Merchant UPI ID</label>
-                      <input type="text" value={institution.upiId} onChange={e => setInstitution({...institution, upiId: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm" />
+                      <label className="text-[11px] font-bold text-slate-500 uppercase">Direct Fee UPI ID</label>
+                      <input type="text" value={institution.upiId} onChange={e => setInstitution({...institution, upiId: e.target.value})} className="w-full mt-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold" />
                     </div>
-                    <button onClick={() => { setUserRole("owner"); setActiveTab("fees"); setAuthStep("app"); showToast(`Registered ${institution.name}!`); }} className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-sm shadow-md">
-                      Complete Setup & Launch →
+                    <button onClick={() => { setUserRole("owner"); setIsParentPreview(false); setActiveTab("fees"); setAuthStep("app"); showToast(`Welcome to ${institution.name}!`); }} className="w-full hero-gradient text-white font-bold py-3.5 rounded-xl text-sm shadow-lg tap-scale mt-2">
+                      Launch Owner Workspace →
                     </button>
-                    <button onClick={() => setAuthStep("login")} className="w-full text-center text-xs text-slate-500 font-medium py-1">← Back to Login</button>
+                    <button onClick={() => setAuthStep("login")} className="w-full text-center text-xs text-slate-400 font-semibold py-1">← Back to Sign In</button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs text-indigo-900">
+                  <div className="space-y-4 animate-enter">
+                    <div className="bg-indigo-50/80 border border-indigo-100 rounded-2xl p-3.5 text-xs text-indigo-950 leading-relaxed">
                       {userRole === "owner" ? (
-                        <span><strong>Owner Mode:</strong> Manage Roll Nos, Fees, Attendance, and Audit Logs.</span>
+                        <span>Manage batches, track overdue fees with 1-tap WhatsApp reminders, and verify parent attendance.</span>
                       ) : (
-                        <span><strong>Parent Mode:</strong> Test with <strong>9820111223</strong> (Aarav & Riya linked).</span>
+                        <span>Demo Parent Number <strong>9820111223</strong> has <strong>2 siblings linked</strong> (Aarav & Riya) with UPI fee pay & attendance confirmation.</span>
                       )}
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-slate-600">10-Digit Mobile Number</label>
+                      <label className="text-[11px] font-bold text-slate-500 uppercase">Mobile Number</label>
                       <div className="flex mt-1">
-                        <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 text-slate-600 text-sm font-semibold">+91</span>
-                        <input type="tel" value={phoneInput} onChange={e => setPhoneInput(e.target.value)} className="w-full px-3.5 py-2.5 border border-slate-300 rounded-r-xl text-sm font-medium" />
+                        <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 text-slate-600 text-sm font-bold">+91</span>
+                        <input type="tel" value={phoneInput} onChange={e => setPhoneInput(e.target.value)} className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-r-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                       </div>
                     </div>
 
                     {otpSent && (
-                      <div>
-                        <label className="text-xs font-semibold text-slate-600">Enter 4-Digit OTP</label>
-                        <input type="text" value={otpInput} onChange={e => setOtpInput(e.target.value)} className="w-full mt-1 px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-bold tracking-widest text-center" />
+                      <div className="animate-enter">
+                        <label className="text-[11px] font-bold text-slate-500 uppercase">4-Digit Verification Code</label>
+                        <input type="text" value={otpInput} onChange={e => setOtpInput(e.target.value)} className="w-full mt-1 px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-extrabold tracking-[0.4em] text-center text-indigo-700" />
                       </div>
                     )}
 
                     {!otpSent ? (
-                      <button onClick={() => setOtpSent(true)} className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-sm shadow-md">Send OTP via WhatsApp / SMS</button>
+                      <button onClick={() => setOtpSent(true)} className="w-full hero-gradient text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-500/25 tap-scale">
+                        Continue with Mobile →
+                      </button>
                     ) : (
                       <button
                         onClick={() => {
                           if (userRole === "parent") {
                             const trimmedPhone = phoneInput.trim();
-                            const matchedChildren = students.filter(s => s.parentPhone === trimmedPhone);
-                            if (matchedChildren.length > 0) {
-                              setParentPhoneLoggedIn(trimmedPhone);
-                              setActiveChildIndex(0);
-                              setActiveTab("parent");
-                            } else {
-                              setParentPhoneLoggedIn("9820111223");
-                              setActiveTab("parent");
-                            }
+                            const matched = students.filter(s => s.parentPhone === trimmedPhone);
+                            setParentPhoneLoggedIn(matched.length > 0 ? trimmedPhone : "9820111223");
+                            setActiveChildIndex(0);
+                            setIsParentPreview(false);
                           } else {
+                            setIsParentPreview(false);
                             setActiveTab("fees");
                           }
                           setAuthStep("app");
                         }}
-                        className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm shadow-md"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-emerald-600/25 tap-scale"
                       >
-                        Verify OTP & Enter App →
+                        Verify & Open Portal →
                       </button>
                     )}
 
                     {userRole === "owner" && (
                       <div className="pt-3 border-t border-slate-100 text-center">
-                        <button onClick={() => setAuthStep("register_inst")} className="text-xs font-bold text-indigo-600 hover:underline">+ New Client? Register Your Tuition Centre</button>
+                        <button onClick={() => setAuthStep("register_inst")} className="text-xs font-bold text-indigo-600 hover:text-indigo-800">
+                          + Register a New Coaching Centre
+                        </button>
                       </div>
                     )}
                   </div>
@@ -420,266 +533,157 @@
         );
       }
 
+      // Determine whether we are showing Parent Portal (either logged in as Parent OR Owner toggled Preview)
+      const showParentPortal = userRole === "parent" || isParentPreview;
+      const activePortalStudent = userRole === "parent" ? currentParentChild : selectedStudent;
+
       return (
-        <div className="min-h-screen bg-slate-900 flex justify-center">
-          <div className="w-full max-w-md bg-slate-50 min-h-screen flex flex-col justify-between relative shadow-2xl">
-            <header className="bg-indigo-600 text-white px-4 pt-4 pb-3 sticky top-0 z-20 shadow-md">
+        <div className="min-h-screen bg-slate-950 flex justify-center">
+          <div className="w-full max-w-md bg-[#F4F6FB] min-h-screen flex flex-col justify-between relative shadow-2xl">
+            
+            {/* ================= TOP HERO HEADER ================= */}
+            <header className="hero-gradient text-white px-4 pt-4 pb-5 rounded-b-[1.75rem] shadow-lg sticky top-0 z-20">
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-extrabold tracking-tight">{institution.name}</h1>
-                    <span className="text-[10px] bg-indigo-800 px-2 py-0.5 rounded-full font-semibold">{userRole === "owner" ? "ADMIN" : "PARENT"}</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-base font-extrabold">
+                    {institution.name.charAt(0)}
                   </div>
-                  <p className="text-[11px] text-indigo-200">{institution.city} • UPI: {institution.upiId}</p>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h1 className="text-base font-extrabold tracking-tight leading-none">{institution.name}</h1>
+                    </div>
+                    <p className="text-[11px] text-indigo-200 mt-1 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                      {showParentPortal ? "Parent Family Portal" : `${students.length} Active Students • ${institution.city}`}
+                    </p>
+                  </div>
                 </div>
+
                 <div className="flex items-center gap-1.5">
-                  {userRole === "owner" && (
-                    <button onClick={() => setAddStudentModal(true)} className="bg-white/15 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg">+ Student</button>
-                  )}
-                  <button onClick={() => { setOtpSent(false); setAuthStep("login"); }} className="bg-indigo-800 text-indigo-100 text-xs font-semibold px-2.5 py-1.5 rounded-lg">Switch Role</button>
-                </div>
-              </div>
-            </header>
-
-            {toast && (
-              <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl border border-slate-700">✅ {toast}</div>
-            )}
-
-            <main className="flex-1 p-4 pb-24 overflow-y-auto space-y-4">
-              {activeTab === "fees" && (
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-slate-500 font-medium">Total Pending Fees</p>
-                      <p className="text-2xl font-extrabold text-rose-600">₹{pendingStudents.reduce((acc, s) => acc + s.feeAmount, 0).toLocaleString("en-IN")}</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{pendingStudents.length} students overdue</p>
-                    </div>
-                    <button
-                      onClick={() => setWaModal({
-                        title: `Bulk Fee Reminder (${pendingStudents.length} Parents)`,
-                        phone: "All Overdue Parents",
-                        message: `Dear Parent, gentle reminder from *${institution.name}*. Tuition fee is overdue. Pay via UPI to *${institution.upiId}*.`
-                      })}
-                      className="bg-emerald-600 text-white text-xs font-bold px-3.5 py-3 rounded-xl shadow-md"
-                    >
-                      💬 Remind All ({pendingStudents.length})
+                  {userRole === "owner" && !isParentPreview && (
+                    <button onClick={() => setAddStudentModal(true)} className="bg-white text-indigo-900 text-xs font-extrabold px-3 py-1.5 rounded-xl shadow-sm tap-scale">
+                      + Add
                     </button>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {students.map(student => (
-                      <div key={student.id} className="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">{student.rollNo}</span>
-                            <p className="font-bold text-slate-800 text-sm">{student.name}</p>
-                            {student.feePaid ? (
-                              <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">PAID</span>
-                            ) : (
-                              <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">{student.daysLate}d late</span>
-                            )}
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5">{student.batch}</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Parent: {student.parentName} (+91 {student.parentPhone})</p>
-                        </div>
-                        <div className="text-right flex flex-col items-end gap-1.5">
-                          <p className="font-extrabold text-slate-900 text-sm">₹{student.feeAmount.toLocaleString("en-IN")}</p>
-                          {!student.feePaid && (
-                            <div className="flex gap-1">
-                              <button onClick={() => handleMarkFeePaid(student.id)} className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-1 rounded-lg">Mark Paid</button>
-                              <button
-                                onClick={() => setWaModal({
-                                  title: `Fee Reminder (${student.rollNo})`,
-                                  phone: `91${student.parentPhone}`,
-                                  message: `Namaste ${student.parentName} ji, reminder from *${institution.name}*. Roll No: *${student.rollNo}* (${student.name}) fee of *₹${student.feeAmount}* is pending. UPI: ${institution.upiId}`
-                                })}
-                                className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-lg"
-                              >
-                                WhatsApp
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "attendance" && (
-                <div className="space-y-4">
-                  <div className="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700">Attendance Exception Board</span>
-                      <span className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg">26 Oct 2026</span>
-                    </div>
-                    <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                      <option value="All">All Batches ({students.length} Students)</option>
-                      <option value="Class 10 - Maths & Sci (4 PM)">Class 10 - Maths & Sci (4 PM)</option>
-                      <option value="Class 9 - Foundation (5:30 PM)">Class 9 - Foundation (5:30 PM)</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {sortedAttendanceStudents.map(student => {
-                      const pStatus = student.parentConfirmation.status;
-                      const tStatus = student.teacherVerification.status;
-                      let badgeColor = "bg-slate-100 text-slate-700";
-                      if (pStatus === "Attended" && tStatus === "Teacher Verified") badgeColor = "bg-emerald-100 text-emerald-800";
-                      else if (pStatus === "Absent" || tStatus === "Reported Absent") badgeColor = "bg-rose-100 text-rose-800";
-                      else if (pStatus === "Not sure" || tStatus === "Conflict") badgeColor = "bg-amber-100 text-amber-800";
-
-                      return (
-                        <div key={student.id} className="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">{student.rollNo}</span>
-                                <p className="font-bold text-slate-800 text-sm">{student.name}</p>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeColor}`}>Parent: {pStatus}</span>
-                              </div>
-                              <p className="text-[11px] text-slate-500 mt-0.5">{student.batch.split("(")[0]}</p>
-                              {student.parentConfirmation.reason && (
-                                <p className="text-[11px] text-rose-600 font-medium italic mt-0.5">Reason: "{student.parentConfirmation.reason}"</p>
-                              )}
-                            </div>
-                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">{tStatus}</span>
-                          </div>
-                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                            <span className="text-[11px] text-slate-400">Verify:</span>
-                            <div className="flex gap-1.5">
-                              <button onClick={() => handleTeacherVerify(student.id, "Teacher Verified")} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${tStatus === "Teacher Verified" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"}`}>Present</button>
-                              <button onClick={() => handleTeacherVerify(student.id, "Reported Absent")} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${tStatus === "Reported Absent" ? "bg-rose-600 text-white" : "bg-slate-100 text-slate-700"}`}>Absent</button>
-                              <button onClick={() => handleTeacherVerify(student.id, "Conflict")} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${tStatus === "Conflict" ? "bg-amber-600 text-white" : "bg-slate-100 text-slate-700"}`}>Conflict</button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "tests" && (
-                <div className="space-y-4">
-                  <div className="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase">Select Student</label>
-                    <select value={selectedStudent.id} onChange={e => setSelectedStudentId(Number(e.target.value))} className="w-full mt-1 text-sm font-bold bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                      {students.map(s => <option key={s.id} value={s.id}>[{s.rollNo}] {s.name} — {s.batch.split("(")[0]}</option>)}
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                      <p className="text-xs text-slate-400 font-medium">Latest Score ({selectedStudent.rollNo})</p>
-                      <p className="text-2xl font-extrabold text-indigo-600 mt-1">{selectedStudent.testScores[selectedStudent.testScores.length - 1].score}/100</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                      <p className="text-xs text-slate-400 font-medium">Batch Rank</p>
-                      <p className="text-2xl font-extrabold text-amber-500 mt-1">#{selectedStudent.rank}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-xs font-bold text-slate-700 mb-4">Last 6 Weekly Tests</h3>
-                    <div className="h-40 flex items-end justify-between gap-2 pt-4 px-2 border-b border-slate-100">
-                      {selectedStudent.testScores.map((t, idx) => (
-                        <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                          <span className="text-[10px] font-bold text-slate-600">{t.score}%</span>
-                          <div style={{ height: `${Math.max(t.score * 1.1, 16)}px` }} className={`w-full rounded-t-lg ${idx === selectedStudent.testScores.length - 1 ? "bg-indigo-600" : "bg-indigo-200"}`}></div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-between px-2 mt-2">
-                      {selectedStudent.testScores.map((t, idx) => <span key={idx} className="flex-1 text-center text-[10px] font-semibold text-slate-400">{t.test}</span>)}
-                    </div>
-                  </div>
-
+                  )}
                   <button
-                    onClick={() => {
-                      const latest = selectedStudent.testScores[selectedStudent.testScores.length - 1];
-                      setWaModal({
-                        title: `Share Report Card (${selectedStudent.rollNo})`,
-                        phone: `91${selectedStudent.parentPhone}`,
-                        message: `📊 *Weekly Test Report — ${institution.name}*\nStudent: *${selectedStudent.name}* (Roll: ${selectedStudent.rollNo})\nScore: *${latest.score}/100*\nRank: *#${selectedStudent.rank}*`
-                      });
-                    }}
-                    className="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-2xl text-sm shadow-lg"
+                    onClick={() => { setOtpSent(false); setIsParentPreview(false); setAuthStep("login"); }}
+                    className="glass-card text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl tap-scale"
                   >
-                    💬 Share Progress Report on WhatsApp
+                    Switch Role
                   </button>
                 </div>
-              )}
+              </div>
 
-              {activeTab === "parent" && (
-                <div className="space-y-4">
-                  {linkedChildren.length > 1 && (
-                    <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-2xl space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase text-indigo-700">Linked Family Sibling Portal</span>
-                        <span className="text-[10px] bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-full">{linkedChildren.length} Kids</span>
+              {/* Quick KPI Strip inside Header for Owner */}
+              {!showParentPortal && (
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div className="glass-card rounded-2xl p-2.5">
+                    <p className="text-[10px] text-indigo-200 font-semibold">Pending Fees</p>
+                    <p className="text-sm font-extrabold text-rose-300 mt-0.5">₹{pendingStudents.reduce((a, b) => a + b.feeAmount, 0).toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="glass-card rounded-2xl p-2.5">
+                    <p className="text-[10px] text-indigo-200 font-semibold">Present Today</p>
+                    <p className="text-sm font-extrabold text-emerald-300 mt-0.5">{students.filter(s => s.attendanceToday === "P").length}/{students.length}</p>
+                  </div>
+                  <div className="glass-card rounded-2xl p-2.5">
+                    <p className="text-[10px] text-indigo-200 font-semibold">New Leads</p>
+                    <p className="text-sm font-extrabold text-amber-300 mt-0.5">{referrals.length} Active</p>
+                  </div>
+                </div>
+              )}
+            </header>
+
+            {/* Toast Pill */}
+            {toast && (
+              <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 backdrop-blur-md text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-2xl border border-white/10 animate-enter">
+                ✨ {toast}
+              </div>
+            )}
+
+            {/* ================= MAIN BODY ================= */}
+            <main className="flex-1 px-4 pt-4 pb-28 overflow-y-auto space-y-4">
+
+              {/* ---------- PARENT PORTAL VIEW ---------- */}
+              {showParentPortal ? (
+                <div className="space-y-4 animate-enter">
+                  {/* Admin Preview Banner if Owner is previewing */}
+                  {userRole === "owner" && isParentPreview && (
+                    <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-amber-900">Previewing:</span>
+                        <select value={selectedStudent.id} onChange={e => setSelectedStudentId(Number(e.target.value))} className="text-xs font-extrabold bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-slate-800">
+                          {students.map(s => <option key={s.id} value={s.id}>{s.rollNo} • {s.name}</option>)}
+                        </select>
                       </div>
-                      <div className="flex flex-wrap gap-1.5 pt-1">
+                      <button onClick={() => setIsParentPreview(false)} className="text-[11px] font-extrabold bg-amber-900 text-white px-2.5 py-1.5 rounded-xl tap-scale">Exit Preview</button>
+                    </div>
+                  )}
+
+                  {/* Multi-Child Sibling Switcher */}
+                  {userRole === "parent" && linkedChildren.length > 1 && (
+                    <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">Select Child ({linkedChildren.length} Enrolled)</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
                         {linkedChildren.map((child, idx) => (
                           <button
                             key={child.id}
                             onClick={() => setActiveChildIndex(idx)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${activeChildIndex === idx ? "bg-indigo-600 text-white shadow" : "bg-white text-indigo-700 border border-indigo-200"}`}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 tap-scale ${activeChildIndex === idx ? "hero-gradient text-white shadow-md" : "bg-slate-100 text-slate-700"}`}
                           >
                             <span>{child.name.split(" ")[0]}</span>
-                            <span className={`text-[9px] px-1.5 rounded ${activeChildIndex === idx ? "bg-indigo-700 text-indigo-100" : "bg-slate-100 text-slate-600"}`}>{child.rollNo}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-md ${activeChildIndex === idx ? "bg-white/20 text-white" : "bg-white text-slate-600"}`}>{child.rollNo}</span>
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {userRole === "owner" && (
-                    <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between">
-                      <span className="text-xs font-semibold text-amber-900">Admin Preview:</span>
-                      <select value={selectedStudent.id} onChange={e => setSelectedStudentId(Number(e.target.value))} className="text-xs font-bold bg-white border border-amber-300 rounded-lg px-2 py-1">
-                        {students.map(s => <option key={s.id} value={s.id}>[{s.rollNo}] {s.name}</option>)}
-                      </select>
+                  {/* Student Profile & Attendance Ring Card */}
+                  <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg inline-block">{activePortalStudent.rollNo}</span>
+                      <h2 className="text-lg font-extrabold text-slate-900">{activePortalStudent.name}</h2>
+                      <p className="text-xs text-slate-500 font-medium">{activePortalStudent.batch}</p>
+                      <p className="text-[11px] text-indigo-600 font-bold pt-0.5">Batch Rank #{activePortalStudent.rank}</p>
                     </div>
-                  )}
-
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">{userRole === "parent" ? currentParentChild.rollNo : selectedStudent.rollNo}</span>
-                          <h2 className="text-base font-extrabold text-slate-800">{userRole === "parent" ? currentParentChild.name : selectedStudent.name}</h2>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1">{userRole === "parent" ? currentParentChild.batch : selectedStudent.batch}</p>
-                      </div>
-                      <span className="bg-emerald-50 text-emerald-700 font-bold text-xs px-2.5 py-1 rounded-full">{userRole === "parent" ? currentParentChild.attendancePct : selectedStudent.attendancePct}%</span>
+                    <div className="flex flex-col items-center">
+                      <AttendanceRing pct={activePortalStudent.attendancePct} />
+                      <span className="text-[10px] font-bold text-slate-400 mt-1">Attendance</span>
                     </div>
                   </div>
 
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  {/* Parent-Confirmed Attendance Card */}
+                  <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Today's Session Confirmation</h3>
-                        <p className="text-[11px] text-slate-500 mt-0.5">26 Oct 2026</p>
+                        <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Today's Class Check-In</h3>
+                        <p className="text-[11px] text-slate-400">26 Oct 2026 • Confirm ward's presence</p>
                       </div>
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-                        {userRole === "parent" ? currentParentChild.parentConfirmation.status : selectedStudent.parentConfirmation.status}
+                      <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
+                        activePortalStudent.parentConfirmation.status === "Attended" ? "bg-emerald-100 text-emerald-800" :
+                        activePortalStudent.parentConfirmation.status === "Absent" ? "bg-rose-100 text-rose-800" :
+                        activePortalStudent.parentConfirmation.status === "Not sure" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"
+                      }`}>
+                        {activePortalStudent.parentConfirmation.status}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
-                      {["Attended", "Absent", "Not sure"].map(opt => {
-                        const targetChild = userRole === "parent" ? currentParentChild : selectedStudent;
-                        const isSelected = targetChild.parentConfirmation.status === opt;
+                      {[
+                        { label: "Attended", icon: "✓", activeCls: "bg-emerald-600 text-white shadow-md shadow-emerald-600/20" },
+                        { label: "Absent", icon: "✕", activeCls: "bg-rose-600 text-white shadow-md shadow-rose-600/20" },
+                        { label: "Not sure", icon: "?", activeCls: "bg-amber-500 text-white shadow-md shadow-amber-500/20" }
+                      ].map(opt => {
+                        const isSelected = activePortalStudent.parentConfirmation.status === opt.label;
                         return (
                           <button
-                            key={opt}
-                            onClick={() => handleParentAttendanceSubmit(targetChild.id, opt, targetChild.parentConfirmation.reason)}
-                            className={`py-3 px-2 rounded-xl text-xs font-bold transition ${
-                              isSelected ? (opt === "Attended" ? "bg-emerald-600 text-white" : opt === "Absent" ? "bg-rose-600 text-white" : "bg-amber-600 text-white") : "bg-slate-100 text-slate-700"
-                            }`}
+                            key={opt.label}
+                            onClick={() => handleParentAttendanceSubmit(activePortalStudent.id, opt.label, activePortalStudent.parentConfirmation.reason)}
+                            className={`py-3 rounded-2xl text-xs font-extrabold transition tap-scale ${isSelected ? opt.activeCls : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
                           >
-                            {opt === "Attended" ? "✓ Attended" : opt === "Absent" ? "✕ Absent" : "? Not Sure"}
+                            {opt.icon} {opt.label}
                           </button>
                         );
                       })}
@@ -687,142 +691,477 @@
 
                     <input
                       type="text"
-                      placeholder="Optional reason (e.g. unwell)..."
-                      value={userRole === "parent" ? currentParentChild.parentConfirmation.reason : selectedStudent.parentConfirmation.reason}
+                      placeholder="Optional note (e.g., unwell, arriving 10 mins late)..."
+                      value={activePortalStudent.parentConfirmation.reason}
                       onChange={e => {
-                        const targetId = userRole === "parent" ? currentParentChild.id : selectedStudent.id;
                         const val = e.target.value;
-                        setStudents(prev => prev.map(s => s.id === targetId ? { ...s, parentConfirmation: { ...s.parentConfirmation, reason: val } } : s));
+                        setStudents(prev => prev.map(s => s.id === activePortalStudent.id ? { ...s, parentConfirmation: { ...s.parentConfirmation, reason: val } } : s));
                       }}
-                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5"
+                      className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                  {/* Fee Due + Pay by UPI Card */}
+                  <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-slate-400 font-medium">Monthly Tuition Fee</p>
-                      <p className="text-xl font-extrabold text-slate-900 mt-0.5">₹{(userRole === "parent" ? currentParentChild.feeAmount : selectedStudent.feeAmount).toLocaleString("en-IN")}</p>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase">Monthly Fee</p>
+                      <p className="text-2xl font-extrabold text-slate-900 mt-0.5">₹{activePortalStudent.feeAmount.toLocaleString("en-IN")}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{activePortalStudent.feePaid ? "Cleared for Oct 2026" : `Due: ${activePortalStudent.dueDate}`}</p>
                     </div>
-                    {(userRole === "parent" ? currentParentChild.feePaid : selectedStudent.feePaid) ? (
-                      <span className="bg-emerald-100 text-emerald-800 font-bold text-xs px-3.5 py-2 rounded-xl">✅ Fee Paid</span>
+                    {activePortalStudent.feePaid ? (
+                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-xs px-4 py-2.5 rounded-2xl">✅ Paid</div>
                     ) : (
                       <button
-                        onClick={() => {
-                          if (userRole === "parent") setSelectedStudentId(currentParentChild.id);
-                          setUpiModal(true);
-                        }}
-                        className="bg-indigo-600 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-md"
+                        onClick={() => { setSelectedStudentId(activePortalStudent.id); setUpiModal(true); }}
+                        className="hero-gradient text-white font-extrabold text-xs px-5 py-3.5 rounded-2xl shadow-lg shadow-indigo-600/25 tap-scale"
                       >
                         Pay by UPI →
                       </button>
                     )}
                   </div>
-                </div>
-              )}
 
-              {activeTab === "owner" && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                      <p className="text-xs text-slate-400 font-medium">Collected (Oct)</p>
-                      <p className="text-xl font-extrabold text-emerald-600 mt-1">₹{(students.filter(s => s.feePaid).reduce((a, b) => a + b.feeAmount, 0) + 28500).toLocaleString("en-IN")}</p>
+                  {/* Interactive Homework Checklist */}
+                  <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Homework Checklist</h3>
+                      <span className="text-[10px] font-bold text-slate-400">Tap to toggle</span>
                     </div>
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                      <p className="text-xs text-slate-400 font-medium">Pending Fees</p>
-                      <p className="text-xl font-extrabold text-rose-600 mt-1">₹{pendingStudents.reduce((a, b) => a + b.feeAmount, 0).toLocaleString("en-IN")}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
-                    <h3 className="text-xs font-bold text-slate-700 uppercase">Attendance & Roll No Audit Trail</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                      {auditLogs.map(log => (
-                        <div key={log.id} className="p-2.5 bg-slate-50 rounded-xl text-xs space-y-0.5">
-                          <div className="flex justify-between font-bold text-slate-800">
-                            <span>{log.action}</span>
-                            <span className="text-[10px] text-slate-400 font-normal">{log.timestamp}</span>
-                          </div>
-                          <p className="text-[11px] text-slate-600">{log.details}</p>
+                    {activePortalStudent.homework.map(hw => (
+                      <div
+                        key={hw.id}
+                        onClick={() => handleToggleHomework(activePortalStudent.id, hw.id)}
+                        className={`p-3 rounded-2xl border transition cursor-pointer flex items-center justify-between tap-scale ${hw.done ? "bg-slate-50 border-slate-100 opacity-75" : "bg-indigo-50/40 border-indigo-100"}`}
+                      >
+                        <div className="pr-2">
+                          <span className="text-[10px] font-extrabold uppercase text-indigo-600">{hw.subject}</span>
+                          <p className={`text-xs font-bold mt-0.5 ${hw.done ? "line-through text-slate-400" : "text-slate-800"}`}>{hw.task}</p>
                         </div>
-                      ))}
-                    </div>
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${hw.done ? "bg-emerald-500 text-white" : "border-2 border-slate-300 bg-white"}`}>
+                          {hw.done && "✓"}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
+              ) : (
+                <>
+                  {/* ---------- TAB 1: FEES ---------- */}
+                  {activeTab === "fees" && (
+                    <div className="space-y-4 animate-enter">
+                      {/* Bulk WhatsApp CTA Card */}
+                      <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between gap-3">
+                        <div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">{pendingStudents.length} Overdue</span>
+                          <h2 className="text-base font-extrabold text-slate-900 mt-1">Fee Collection</h2>
+                          <p className="text-[11px] text-slate-500">1-tap WhatsApp reminder to all pending parents</p>
+                        </div>
+                        <button
+                          onClick={() => setWaModal({
+                            title: `Remind All (${pendingStudents.length} Parents)`,
+                            phone: "All Overdue Parents",
+                            message: `Namaste Parent, gentle reminder from *${institution.name}*. Your ward's monthly tuition fee is overdue. Please pay via UPI to *${institution.upiId}*.`
+                          })}
+                          disabled={pendingStudents.length === 0}
+                          className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-xs font-extrabold px-4 py-3 rounded-2xl shadow-lg shadow-emerald-600/20 shrink-0 tap-scale"
+                        >
+                          💬 Remind All
+                        </button>
+                      </div>
+
+                      {/* Filter Toggle */}
+                      <div className="flex gap-2">
+                        <button onClick={() => setFeeFilter("pending")} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${feeFilter === "pending" ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200"}`}>
+                          Pending ({pendingStudents.length})
+                        </button>
+                        <button onClick={() => setFeeFilter("all")} className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${feeFilter === "all" ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200"}`}>
+                          All Students ({students.length})
+                        </button>
+                      </div>
+
+                      {/* Student Fee Cards */}
+                      <div className="space-y-3">
+                        {displayedFeeStudents.map(student => (
+                          <div key={student.id} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">{student.rollNo}</span>
+                                  <h3 className="font-extrabold text-slate-900 text-sm">{student.name}</h3>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">{student.batch}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-extrabold text-slate-900 text-base">₹{student.feeAmount.toLocaleString("en-IN")}</p>
+                                {student.feePaid ? (
+                                  <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">PAID</span>
+                                ) : (
+                                  <span className="text-[10px] font-extrabold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">{student.daysLate} days late</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {!student.feePaid && (
+                              <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                                <span className="text-[11px] text-slate-400 font-medium">{student.parentName} • {student.parentPhone}</span>
+                                <div className="flex gap-1.5">
+                                  <button onClick={() => handleMarkFeePaid(student.id)} className="text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl tap-scale">
+                                    Mark Paid
+                                  </button>
+                                  <button
+                                    onClick={() => setWaModal({
+                                      title: `WhatsApp Reminder • ${student.rollNo}`,
+                                      phone: `91${student.parentPhone}`,
+                                      message: `Namaste ${student.parentName} ji, gentle reminder from *${institution.name}*. Roll No: *${student.rollNo}* (${student.name}) fee of *₹${student.feeAmount}* (${student.daysLate} days late) is pending. Pay via UPI: ${institution.upiId}`
+                                    })}
+                                    className="text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl tap-scale"
+                                  >
+                                    WhatsApp
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ---------- TAB 2: ATTENDANCE ---------- */}
+                  {activeTab === "attendance" && (
+                    <div className="space-y-4 animate-enter">
+                      <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="text-sm font-extrabold text-slate-900">Today's Batch Attendance</h2>
+                            <p className="text-[11px] text-slate-400">Exceptions & parent responses sorted first</p>
+                          </div>
+                          <span className="text-[11px] font-extrabold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-xl">26 Oct</span>
+                        </div>
+                        <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} className="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800">
+                          <option value="All">All Batches ({students.length} Students)</option>
+                          <option value="Class 10 - Maths & Sci (4 PM)">Class 10 - Maths & Sci (4 PM)</option>
+                          <option value="Class 9 - Foundation (5:30 PM)">Class 9 - Foundation (5:30 PM)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {sortedAttendanceStudents.map(student => {
+                          const pStatus = student.parentConfirmation.status;
+                          const tStatus = student.teacherVerification.status;
+                          let pBadge = "bg-slate-100 text-slate-600";
+                          if (pStatus === "Attended") pBadge = "bg-emerald-100 text-emerald-800";
+                          else if (pStatus === "Absent") pBadge = "bg-rose-100 text-rose-800";
+                          else if (pStatus === "Not sure") pBadge = "bg-amber-100 text-amber-800";
+
+                          return (
+                            <div key={student.id} className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">{student.rollNo}</span>
+                                    <h3 className="font-extrabold text-slate-900 text-sm">{student.name}</h3>
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${pBadge}`}>Parent: {pStatus}</span>
+                                    <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{tStatus}</span>
+                                  </div>
+                                  {student.parentConfirmation.reason && (
+                                    <p className="text-[11px] text-rose-600 font-semibold mt-1.5 bg-rose-50 px-2.5 py-1 rounded-lg">Note: "{student.parentConfirmation.reason}"</p>
+                                  )}
+                                </div>
+
+                                {/* Quick P / A Toggle Buttons */}
+                                <div className="flex gap-1.5 shrink-0">
+                                  <button
+                                    onClick={() => handleTeacherVerify(student.id, "Teacher Verified")}
+                                    className={`w-10 h-10 rounded-2xl font-extrabold text-xs transition tap-scale ${student.attendanceToday === "P" && tStatus !== "Conflict" ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/25" : "bg-slate-100 text-slate-500"}`}
+                                  >
+                                    P
+                                  </button>
+                                  <button
+                                    onClick={() => handleTeacherVerify(student.id, "Reported Absent")}
+                                    className={`w-10 h-10 rounded-2xl font-extrabold text-xs transition tap-scale ${student.attendanceToday === "A" ? "bg-rose-600 text-white shadow-md shadow-rose-600/25" : "bg-slate-100 text-slate-500"}`}
+                                  >
+                                    A
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const unnotifiedAbsentees = filteredAttendanceStudents.filter(s => s.attendanceToday === "A" && s.parentConfirmation.status !== "Absent");
+                          if (unnotifiedAbsentees.length === 0) {
+                            showToast("Attendance saved! No unnotified absences.");
+                          } else {
+                            setWaModal({
+                              title: `Absent Alert (${unnotifiedAbsentees.length} Unreported)`,
+                              phone: `91${unnotifiedAbsentees[0].parentPhone}`,
+                              message: `Namaste, *${unnotifiedAbsentees.map(a => `${a.name} (${a.rollNo})`).join(", ")}* was marked *ABSENT* today at *${institution.name}* (26 Oct). Please confirm if everything is okay.`
+                            });
+                          }
+                        }}
+                        className="w-full hero-gradient text-white font-extrabold py-4 rounded-2xl text-xs shadow-lg shadow-indigo-600/25 tap-scale"
+                      >
+                        Save Attendance & Alert Unreported Absentees
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ---------- TAB 3: TESTS ---------- */}
+                  {activeTab === "tests" && (
+                    <div className="space-y-4 animate-enter">
+                      <div className="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-100">
+                        <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Student Performance Card</label>
+                        <select value={selectedStudent.id} onChange={e => setSelectedStudentId(Number(e.target.value))} className="w-full mt-1 text-sm font-extrabold bg-slate-50 border border-slate-200 rounded-2xl p-3 text-slate-900">
+                          {students.map(s => <option key={s.id} value={s.id}>{s.rollNo} • {s.name}</option>)}
+                        </select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                          <p className="text-[11px] font-bold text-slate-400">Latest Weekly Test</p>
+                          <p className="text-2xl font-extrabold text-indigo-600 mt-1">{selectedStudent.testScores[selectedStudent.testScores.length - 1].score}<span className="text-sm text-slate-400">/100</span></p>
+                          <p className="text-[11px] font-semibold text-slate-500 mt-0.5">{selectedStudent.testScores[selectedStudent.testScores.length - 1].topic}</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                          <p className="text-[11px] font-bold text-slate-400">Class Rank</p>
+                          <p className="text-2xl font-extrabold text-amber-500 mt-1">#{selectedStudent.rank}</p>
+                          <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">↑ Consistent Growth</p>
+                        </div>
+                      </div>
+
+                      {/* Gradient Bar Chart for Last 6 Tests */}
+                      <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">6-Week Score Trend</h3>
+                          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Last 6 Tests</span>
+                        </div>
+                        <div className="h-44 flex items-end justify-between gap-2.5 pt-4 px-1 border-b border-slate-100">
+                          {selectedStudent.testScores.map((t, idx) => {
+                            const isLatest = idx === selectedStudent.testScores.length - 1;
+                            return (
+                              <div key={idx} className="flex-1 flex flex-col items-center gap-1.5">
+                                <span className={`text-[10px] font-extrabold ${isLatest ? "text-indigo-700" : "text-slate-500"}`}>{t.score}</span>
+                                <div
+                                  style={{ height: `${Math.max(t.score * 1.25, 18)}px` }}
+                                  className={`w-full rounded-t-xl transition-all duration-500 ${isLatest ? "hero-gradient shadow-md shadow-indigo-500/30" : "bg-indigo-100"}`}
+                                ></div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-between px-1 mt-2.5">
+                          {selectedStudent.testScores.map((t, idx) => (
+                            <span key={idx} className="flex-1 text-center text-[10px] font-extrabold text-slate-400">{t.test}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const latest = selectedStudent.testScores[selectedStudent.testScores.length - 1];
+                          setWaModal({
+                            title: `Share Report • ${selectedStudent.rollNo}`,
+                            phone: `91${selectedStudent.parentPhone}`,
+                            message: `📊 *Weekly Report Card — ${institution.name}*\nStudent: *${selectedStudent.name}* (${selectedStudent.rollNo})\nTopic: ${latest.topic}\nScore: *${latest.score}/100*\nClass Rank: *#${selectedStudent.rank}*\nAttendance: ${selectedStudent.attendancePct}%`
+                          });
+                        }}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-2xl text-xs shadow-lg shadow-emerald-600/20 tap-scale"
+                      >
+                        💬 Share Report Card on WhatsApp
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ---------- TAB 4: OWNER DASHBOARD ---------- */}
+                  {activeTab === "owner" && (
+                    <div className="space-y-4 animate-enter">
+                      {/* Parent Portal Preview Launcher */}
+                      <div className="bg-indigo-50 border border-indigo-200 p-4 rounded-3xl flex items-center justify-between gap-3">
+                        <div>
+                          <h3 className="text-xs font-extrabold text-indigo-950">Parent Portal Simulator</h3>
+                          <p className="text-[11px] text-indigo-700 mt-0.5">Preview UPI payment & parent check-in view</p>
+                        </div>
+                        <button
+                          onClick={() => setIsParentPreview(true)}
+                          className="hero-gradient text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl shadow-md shrink-0 tap-scale"
+                        >
+                          Preview View →
+                        </button>
+                      </div>
+
+                      {/* Collection Progress Bar */}
+                      <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-[11px] font-bold text-slate-400 uppercase">October Fee Collection</p>
+                            <p className="text-xl font-extrabold text-emerald-600 mt-0.5">
+                              ₹{(students.filter(s => s.feePaid).reduce((a, b) => a + b.feeAmount, 0) + 28500).toLocaleString("en-IN")}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[11px] font-bold text-rose-500">Pending: ₹{pendingStudents.reduce((a, b) => a + b.feeAmount, 0).toLocaleString("en-IN")}</p>
+                          </div>
+                        </div>
+                        <div className="w-full h-3 bg-rose-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: "76%" }}></div>
+                        </div>
+                      </div>
+
+                      {/* New Referral Enquiries */}
+                      <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">New Referral Enquiries</h3>
+                          <span className="text-[10px] font-extrabold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">{referrals.length} Leads</span>
+                        </div>
+                        {referrals.map(ref => (
+                          <div key={ref.id} className="p-3 bg-slate-50 rounded-2xl flex items-center justify-between">
+                            <div>
+                              <p className="text-xs font-extrabold text-slate-900">{ref.studentName} <span className="text-slate-400 font-semibold">({ref.className})</span></p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Via: {ref.referredBy}</p>
+                            </div>
+                            <a
+                              href={`https://wa.me/91${ref.phone}?text=${encodeURIComponent(`Hello! Calling from ${institution.name} regarding your admission enquiry.`)}`}
+                              target="_blank"
+                              className="bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-2 rounded-xl tap-scale"
+                            >
+                              Chat ↗
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Audit Trail */}
+                      <div className="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 space-y-2.5">
+                        <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Security & Attendance Audit Log</h3>
+                        <div className="space-y-2 max-h-44 overflow-y-auto no-scrollbar">
+                          {auditLogs.map(log => (
+                            <div key={log.id} className="p-2.5 bg-slate-50 rounded-2xl text-xs">
+                              <div className="flex justify-between font-bold text-slate-800">
+                                <span>{log.action}</span>
+                                <span className="text-[10px] text-slate-400 font-medium">{log.timestamp}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-0.5">{log.details} • <span className="text-indigo-600 font-semibold">{log.actor}</span></p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </main>
 
-            {userRole === "owner" ? (
-              <nav className="bg-white border-t border-slate-200 px-2 py-2 flex justify-around items-center fixed bottom-0 w-full max-w-md z-20">
+            {/* ================= BOTTOM FLOATING DOCK ================= */}
+            {!showParentPortal ? (
+              <nav className="bg-white/95 backdrop-blur-lg border-t border-slate-200/80 px-3 py-2.5 flex justify-around items-center fixed bottom-0 w-full max-w-md z-20 shadow-[0_-8px_25px_rgba(15,23,42,0.06)]">
                 {[
                   { id: "fees", label: "Fees", icon: "₹" },
                   { id: "attendance", label: "Attendance", icon: "✓" },
                   { id: "tests", label: "Tests", icon: "📊" },
-                  { id: "parent", label: "Parent View", icon: "👪" },
                   { id: "owner", label: "Owner", icon: "🏢" }
-                ].map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition ${activeTab === tab.id ? "text-indigo-600 font-bold bg-indigo-50" : "text-slate-400 font-medium"}`}
-                  >
-                    <span className="text-base">{tab.icon}</span>
-                    <span className="text-[10px] mt-0.5">{tab.label}</span>
-                  </button>
-                ))}
+                ].map(tab => {
+                  const active = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex flex-col items-center py-1.5 px-4 rounded-2xl transition tap-scale ${active ? "hero-gradient text-white shadow-md shadow-indigo-600/25" : "text-slate-400 font-semibold"}`}
+                    >
+                      <span className="text-sm font-extrabold">{tab.icon}</span>
+                      <span className="text-[10px] font-bold mt-0.5">{tab.label}</span>
+                    </button>
+                  );
+                })}
               </nav>
             ) : (
-              <div className="bg-white border-t border-slate-200 p-3 flex justify-between items-center fixed bottom-0 w-full max-w-md z-20">
-                <span className="text-xs text-slate-600 font-medium">Parent: <strong>{currentParentChild.parentName}</strong></span>
-                <button onClick={() => setAuthStep("login")} className="text-xs text-indigo-600 font-bold underline">Switch Account</button>
+              <div className="bg-white/95 backdrop-blur-lg border-t border-slate-200 p-3.5 flex justify-between items-center fixed bottom-0 w-full max-w-md z-20">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span className="text-xs text-slate-700 font-bold">{activePortalStudent.parentName}</span>
+                </div>
+                {userRole === "owner" ? (
+                  <button onClick={() => setIsParentPreview(false)} className="text-xs text-indigo-600 font-extrabold">← Back to Owner Tabs</button>
+                ) : (
+                  <button onClick={() => setAuthStep("login")} className="text-xs text-indigo-600 font-extrabold">Switch Account</button>
+                )}
               </div>
             )}
 
+            {/* ================= MODALS ================= */}
             {addStudentModal && (
-              <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                <form onSubmit={handleAddStudent} className="bg-white w-full max-w-sm rounded-3xl p-5 space-y-3 shadow-2xl">
+              <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <form onSubmit={handleAddStudent} className="bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-3.5 shadow-2xl animate-enter">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-sm font-extrabold text-slate-800">Add New Student</h3>
-                    <span className="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded">Assigned: TD-2026-{101 + students.length}</span>
+                    <h3 className="text-base font-extrabold text-slate-900">Enroll Student</h3>
+                    <span className="text-[10px] bg-indigo-100 text-indigo-700 font-extrabold px-2.5 py-1 rounded-lg">TD-2026-{101 + students.length}</span>
                   </div>
-                  <input type="text" required placeholder="Student Full Name" value={newStudent.name} onChange={e => setNewStudent({...newStudent, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs" />
-                  <input type="text" placeholder="Parent Name" value={newStudent.parentName} onChange={e => setNewStudent({...newStudent, parentName: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs" />
-                  <input type="tel" required placeholder="Parent 10-Digit WhatsApp Phone" value={newStudent.parentPhone} onChange={e => setNewStudent({...newStudent, parentPhone: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs" />
-                  <input type="number" placeholder="Monthly Fee (₹)" value={newStudent.feeAmount} onChange={e => setNewStudent({...newStudent, feeAmount: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs" />
+                  <input type="text" required placeholder="Student Full Name" value={newStudent.name} onChange={e => setNewStudent({...newStudent, name: e.target.value})} className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold" />
+                  <select value={newStudent.batch} onChange={e => setNewStudent({...newStudent, batch: e.target.value})} className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
+                    <option value="Class 10 - Maths & Sci (4 PM)">Class 10 - Maths & Sci (4 PM)</option>
+                    <option value="Class 9 - Foundation (5:30 PM)">Class 9 - Foundation (5:30 PM)</option>
+                  </select>
+                  <input type="text" placeholder="Parent Name" value={newStudent.parentName} onChange={e => setNewStudent({...newStudent, parentName: e.target.value})} className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold" />
+                  <input type="tel" required placeholder="Parent 10-Digit WhatsApp Phone" value={newStudent.parentPhone} onChange={e => setNewStudent({...newStudent, parentPhone: e.target.value})} className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold" />
+                  <input type="number" placeholder="Monthly Fee (₹)" value={newStudent.feeAmount} onChange={e => setNewStudent({...newStudent, feeAmount: e.target.value})} className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold" />
                   <div className="flex gap-2 pt-2">
-                    <button type="button" onClick={() => setAddStudentModal(false)} className="flex-1 py-2.5 text-xs font-bold bg-slate-100 rounded-xl">Cancel</button>
-                    <button type="submit" className="flex-1 py-2.5 text-xs font-bold bg-indigo-600 text-white rounded-xl">Register</button>
+                    <button type="button" onClick={() => setAddStudentModal(false)} className="flex-1 py-3 text-xs font-bold bg-slate-100 text-slate-600 rounded-xl">Cancel</button>
+                    <button type="submit" className="flex-1 py-3 text-xs font-extrabold hero-gradient text-white rounded-xl shadow-md">Assign Roll No</button>
                   </div>
                 </form>
               </div>
             )}
 
             {waModal && (
-              <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                <div className="bg-white w-full max-w-sm rounded-3xl p-5 space-y-3 shadow-2xl">
-                  <h3 className="text-sm font-extrabold text-slate-800">{waModal.title}</h3>
-                  <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-xs text-slate-700 whitespace-pre-line">{waModal.message}</div>
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={() => setWaModal(null)} className="flex-1 py-2.5 text-xs font-bold bg-slate-100 rounded-xl">Close</button>
-                    <a href={`https://wa.me/${waModal.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waModal.message)}`} target="_blank" onClick={() => setWaModal(null)} className="flex-1 py-2.5 text-xs font-bold bg-emerald-600 text-white text-center rounded-xl">Open WhatsApp ↗</a>
+              <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4 shadow-2xl animate-enter">
+                  <h3 className="text-sm font-extrabold text-slate-900">{waModal.title}</h3>
+                  <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl text-xs text-slate-700 whitespace-pre-line leading-relaxed font-medium">
+                    {waModal.message}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setWaModal(null)} className="flex-1 py-3 text-xs font-bold bg-slate-100 text-slate-600 rounded-xl">Close</button>
+                    <a
+                      href={`https://wa.me/${waModal.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waModal.message)}`}
+                      target="_blank"
+                      onClick={() => { setWaModal(null); showToast("Opening WhatsApp..."); }}
+                      className="flex-1 py-3 text-xs font-extrabold bg-emerald-600 text-white text-center rounded-xl shadow-md"
+                    >
+                      Send via WhatsApp ↗
+                    </a>
                   </div>
                 </div>
               </div>
             )}
 
             {upiModal && (
-              <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-                <div className="bg-white w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl text-center">
-                  <h3 className="text-sm font-extrabold text-slate-800">Pay Fee via UPI</h3>
-                  <p className="text-xs text-slate-500">Paying <strong>₹{selectedStudent.feeAmount}</strong> to <strong>{institution.upiId}</strong></p>
+              <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white w-full max-w-sm rounded-[2rem] p-6 space-y-4 shadow-2xl text-center animate-enter">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-extrabold mx-auto">₹</div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">Instant UPI Fee Payment</h3>
+                    <p className="text-xs text-slate-500 mt-1">Paying <strong className="text-slate-800">₹{selectedStudent.feeAmount.toLocaleString("en-IN")}</strong> to <strong className="text-indigo-600">{institution.upiId}</strong></p>
+                  </div>
                   <div className="grid grid-cols-3 gap-2">
                     {["GPay", "PhonePe", "Paytm"].map(app => (
-                      <button key={app} onClick={() => handleMarkFeePaid(selectedStudent.id)} className="py-3 border border-slate-200 rounded-xl text-xs font-bold hover:bg-indigo-50">{app}</button>
+                      <button
+                        key={app}
+                        onClick={() => handleMarkFeePaid(selectedStudent.id)}
+                        className="py-3.5 border border-slate-200 rounded-2xl text-xs font-extrabold text-slate-800 hover:bg-indigo-50 hover:border-indigo-300 tap-scale"
+                      >
+                        {app}
+                      </button>
                     ))}
                   </div>
-                  <button onClick={() => setUpiModal(false)} className="w-full py-2 text-xs text-slate-400 font-semibold">Cancel</button>
+                  <button onClick={() => setUpiModal(false)} className="w-full py-2 text-xs text-slate-400 font-bold">Cancel</button>
                 </div>
               </div>
             )}
+
           </div>
         </div>
       );
