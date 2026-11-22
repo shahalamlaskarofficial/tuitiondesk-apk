@@ -1,0 +1,6 @@
+{
+  "appId": "in.tuitiondesk.app",
+  "appName": "TuitionDesk",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
